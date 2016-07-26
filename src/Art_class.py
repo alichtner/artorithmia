@@ -4,7 +4,8 @@ from scipy import misc
 from collections import Counter
 from colorutils import Color
 from colorthief import ColorThief
-import seaborn as sns
+from PIL import Image
+from skimage import color, io
 import cv2
 import os
 
@@ -25,6 +26,7 @@ class Art(object):
         self.aspect_ratio = None
         self.price = None
         self.medium = None
+        self.symmetry = None
 
     def __str__(self):
         str = """\n\033[1m{}\033[0m is an instance of an Art object \
@@ -36,11 +38,17 @@ class Art(object):
         self.image = misc.imread(filename)
         self.short_name = self.filename.split('/')[-1].split('.')[0]
         self.aspect_ratio = 1. * self.image.shape[1]/self.image.shape[0]
+        self.extract_blur()
+        self.extract_symmetry()
         return None
 
     def show_image(self):
         plt.imshow(self.image)
         plt.show()
+        return None
+
+    def show_thumbnail(self):
+        Image.open(self.image).thumbnail((200, 200))
         return None
 
     def extract_colors(self, n_colors=5):
@@ -50,7 +58,23 @@ class Art(object):
         self.bluriness = cv2.Laplacian(self.image, cv2.CV_64F).var()
 
     def extract_symmetry(self):
-        pass
+        stop_point = -1
+        if len(self.image.shape) == 3:
+            height, width, channels = self.image.shape
+        else:
+            height, width = self.image.shape
+        if width % 2 != 0:
+            width -= 1
+            pixels = height * width
+            left = self.image[:, :width/2]
+            right = self.image[:, width/2:stop_point]
+        else:
+            pixels = height * width
+            left = self.image[:, :width/2]
+            right = self.image[:, width/2:stop_point]
+        left_gray = color.rgb2gray(left)
+        right_gray = color.rgb2gray(right)
+        self.symmetry = np.abs(left_gray - np.fliplr(right_gray)).sum()/(pixels/1.*2)
 
     def extract_movement(self):
         pass
