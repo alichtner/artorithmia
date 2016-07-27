@@ -3,9 +3,14 @@
 ## Major Task List
 - Build Feature Engine
 - Build Test Suite
+- Build Clusterer [KMeans, Affinity, DBSCAN]
 - Build Recommender
 - Build Webapp
 - Build API
+
+### Mini Task List
+- import json metadata for the image
+- make HSV vectors
 
 ## Day 1
 Today was spent validating some of the ideas I will be using to cluster, discover and recommend art for Drizl. The day was mainly focused on starting to build up the pipeline needed to get features for artwork. I explored different packages which can retrieve image characterists (PIL, skimage, misc, openCV, color, colorthief...). Some of the features I'd like to build are: color palette, color temperature, blurriness, symmetry, complexity.
@@ -40,3 +45,14 @@ Today was spent validating some of the ideas I will be using to cluster, discove
   - Refined feature set
   - started `cluster_engine.py` to build a cluster pipeline
   - research hsv colorspace
+
+## Day 3
+  - Started the day by getting the `cluster_engine` working. It will now take a directory of images and create a `clusterArt` object which contains a collection of `Art` objects. During this process, features are calculated for every piece. A k-means model is fit after standardizing the data. The cluster_engine will return a silhouette score of how well the clusters are formed, a k_means plot showing the clusters and their centers as well as representative images closest to the cluster centers.
+
+  - Ran the pre-built clustering engine that Drizl had built. It uses extracted features from Turi's imagenet. The script takes a very LONG time to run. It also appears as though the images are scaled to be square before running through the feature extraction matrix. Graphlab extracted 4096 features from each image.
+
+  - more color research (http://colorizer.org/)[Colorizer and HSV]
+  - **ask what the `primary_index` is in the artwork.json**
+  - **Ignored Drizl Meta:**
+    - it seems like these won't necessarily play a role in clustering art or helping someone discover the art that they might like
+    - `home_collection`, `weight`, `ACL`, `home_collection_index`, `supplimentaryImages`, `tryout_collection`, `tryout_collection_index`

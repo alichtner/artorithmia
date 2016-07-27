@@ -28,10 +28,8 @@ class Art(object):
         self.b_hist = None
         self.bluriness = None
         self.aspect_ratio = None
-        self.price = None
         self.medium = None
         self.symmetry = None
-        self.no_likes = None # get this from the Drizl CSV
         self.size = None
 
     def __str__(self):
@@ -53,6 +51,30 @@ class Art(object):
         self.extract_blur()
         self.extract_symmetry()
         return None
+
+    def parse_meta(self, json_obj):
+        """
+        Takes a json object and parses the values into attributes
+        """
+        self.styles = json_obj['styles']
+        self.can_hung_without_frame = json_obj['can_hung_without_frame']
+        self.surface = json_obj['surface']  # ex. 'canvas'
+        self.published_at = json_obj['published_at']
+        self.updatedAt = json_obj['updatedAt']
+        self.createdAt = json_obj['createdAt']
+        self.retail_price = json_obj['retail_price']
+        self.style_other = json_obj['style_other']  # 'floral'
+        self.objectId = json_obj['objectId']
+        self.title = json_obj['title']
+        self.is_framed = json_obj['is_framed']
+        self.width = json_obj['width']  # inches
+        self.primary_index = json_obj['primary_index']
+        self.height = json_obj['height']    # inches
+        self.public_id = json_obj['metadata']['public_id']
+        self.sold = json_obj['sold']
+        self.depth = json_obj['depth']
+        self.no_of_likes = json_obj['no_of_likes']
+        #,metadata,profile,medium,description,collection,tryout_collection,can_commission_diff_size,is_primary,recommended_matted_border,collection_index,published
 
     def show_image(self):
         sns.set_style("whitegrid", {'axes.grid' : False})
