@@ -6,13 +6,16 @@ import urllib2 as urllib
 import io
 
 if __name__ == '__main__':
+    # load cloudinary API information
     name = os.environ['CLOUDINARY_CLOUD_NAME']
     key = os.environ['CLOUDINARY_API_KEY']
     secret = os.environ['CLOUDINARY_API_SECRET']
 
+    # configure cloudinary and load Drizl dataframe
     cloud.config(cloud_name=name, api_key=key, api_secret=secret)
     drizl = pd.read_json('data/Artwork.json', orient='records')
 
+    # request image from cloudinary and save
     for i in xrange(len(drizl)):
         try:
             url = drizl['results'][i]['image']

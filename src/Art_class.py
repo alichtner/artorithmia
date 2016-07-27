@@ -6,6 +6,7 @@ from colorutils import Color
 from colorthief import ColorThief
 from PIL import Image
 from skimage import color, io
+import seaborn as sns
 import cv2
 import os
 
@@ -13,7 +14,10 @@ import os
 class Art(object):
     """
     Create an Art object and build a set of attributes and methods
-    about the Art itself
+    about the Art itself.
+
+    INPUT: None
+    OUTPUT: Art (object)
     """
     def __init__(self):
         self.filename = None
@@ -27,6 +31,8 @@ class Art(object):
         self.price = None
         self.medium = None
         self.symmetry = None
+        self.no_likes = None # get this from the Drizl CSV
+        self.size = None
 
     def __str__(self):
         str = """\n\033[1m{}\033[0m is an instance of an Art object \
@@ -34,6 +40,12 @@ class Art(object):
         return str.format(self.short_name, self.aspect_ratio)
 
     def load_image(self, filename):
+        """
+        Load image file and build attributes
+
+        INPUT: filename (ex: jpg, png)
+        OUTPUT: None
+        """
         self.filename = filename
         self.image = misc.imread(filename)
         self.short_name = self.filename.split('/')[-1].split('.')[0]
@@ -43,6 +55,7 @@ class Art(object):
         return None
 
     def show_image(self):
+        sns.set_style("whitegrid", {'axes.grid' : False})
         plt.imshow(self.image)
         plt.show()
         return None
@@ -54,11 +67,21 @@ class Art(object):
     def extract_colors(self, n_colors=5):
         pass
 
+    def to_hsv(self, plot=False):
+        self.image = color.rgb2hsv(self.image)
+
+    def to_rgb(self, plot=False):
+        self.image = color.hsv2rgb(self.image)
+        if plot is True:
+            self.plot_rgb()
+
     def extract_blur(self):
+        # do on grayscale
+        # check what the mean would give instead of variance
         self.bluriness = cv2.Laplacian(self.image, cv2.CV_64F).var()
+        lap = cv2.Laplacian(self.image, cv2.CV_64F)
 
     def extract_symmetry(self):
-        stop_point = -1
         if len(self.image.shape) == 3:
             height, width, channels = self.image.shape
         else:
@@ -67,11 +90,11 @@ class Art(object):
             width -= 1
             pixels = height * width
             left = self.image[:, :width/2]
-            right = self.image[:, width/2:stop_point]
+            right = self.image[:, width/2:-1]
         else:
             pixels = height * width
             left = self.image[:, :width/2]
-            right = self.image[:, width/2:stop_point]
+            right = self.image[:, width/2:]
         left_gray = color.rgb2gray(left)
         right_gray = color.rgb2gray(right)
         self.symmetry = np.abs(left_gray - np.fliplr(right_gray)).sum()/(pixels/1.*2)
@@ -79,7 +102,7 @@ class Art(object):
     def extract_movement(self):
         pass
 
-    def extract_rgb(self):
+    def plot_rgb(self):
         # count rgb values
         r = Counter(self.image[:, :, 0].flatten())
         g = Counter(self.image[:, :, 1].flatten())
@@ -90,7 +113,6 @@ class Art(object):
 
         # plot the figure
         x = range(256)
-        plt.ylim((0, 2500))
         fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(12, 4))
         ax1.fill_between(x, 0, self.r_hist.values(), facecolor='red')
         ax1.set_xlabel('Red')
@@ -100,7 +122,7 @@ class Art(object):
         ax3.set_xlabel('Blue')
         plt.show()
 
-    def get_palette(self, color_count=6, plot=False):
+    def get_palette(self, color_count=6, plot=False, save=False):
         color_thief = ColorThief(self.filename)
         # get the dominant color
         dominant_color = color_thief.get_color(quality=1)
@@ -113,7 +135,10 @@ class Art(object):
                 my_cols.append(c.hex)
             sns.palplot(sns.color_palette(my_cols))
             plt.title(str(self.short_name) + '_Palette')
-            plt.savefig(fname)
+            if save is True:
+                plt.savefig(fname)
+            else:
+                plt.show()
 
 
 if __name__ == '__main__':
