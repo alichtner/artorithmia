@@ -46,7 +46,7 @@ def plot_kmeans(features, labels, centers, x, y):
              features[:, y].max() + 0.1 * features[:, y].max())
     plt.scatter(features[:, x], features[:, y],
                 c=colors, edgecolors='face', alpha=0.3)
-    plt.scatter(center[:, x],
+    plt.scatter(centers[:, x],
                 centers[:, y],
                 c=['r', 'b', 'g', 'c', 'm'], s=50)
     plt.show()

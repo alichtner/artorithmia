@@ -4,7 +4,7 @@ from scipy import misc
 from collections import Counter
 from colorutils import Color
 from colorthief import ColorThief
-from PIL import Image
+from Pillow import Image
 from skimage import color, io
 import seaborn as sns
 import cv2
@@ -37,7 +37,8 @@ class Art(object):
         OUTPUT: None
         """
         self.filename = filename
-        self.image = misc.imread(filename)
+        self.art = Image.open(filename)
+        self.image = np.array(self.art)
         self.short_name = self.filename.split('/')[-1].split('.')[0]
         self.aspect_ratio = 1. * self.image.shape[1]/self.image.shape[0]
         self.extract_blur()
