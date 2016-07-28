@@ -32,13 +32,21 @@ class ClusterArt(object):
         self.cluster_fit = None
         self.cluster_labels = None
         self.exemplar_images = None
+        self.metadata = None
 
-    def load_collection(self, filepath):
-        for image in os.listdir(filepath):
+    def load_collection(self, images_filepath, add_meta=False):
+        for image in os.listdir(images_filepath):
             art = Art()
-            art.load_image(filepath + image)
+            art.load_image(images_filepath + image)
+            if add_meta is True:
+                image_meta = image.replace('_', '/').split('.')[0]
+                art.parse_meta(self.metadata['metadata']['public_id'] == image_meta)
             self.artwork.append(art)
-        print '{} images added to collection'.format(len(os.listdir(filepath)))
+        print '{} images added to collection'.format(len(os.listdir(images_filepath)))
+
+    def load_json(self, json_filepath):
+        with open(json_filepath) as f:
+            self.metadata = json.load(f)
 
     def build_features(self):
         # create simple feature set of symmetry, blurriness, aspect_ratio
@@ -112,5 +120,5 @@ if __name__ == '__main__':
     cluster.fit()
     cluster.predict()
     cluster.silhouette()
-    cluster.get_exemplar_images(plot=False)
-    cluster.plot_kmeans(0, 2)
+    cluster.get_exemplar_images(plot=True)
+    cluster.plot_kmeans(0, 1)

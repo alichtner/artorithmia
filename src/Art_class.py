@@ -57,7 +57,7 @@ class Art(object):
         Takes a json object and parses the values into attributes
         """
         self.styles = json_obj['styles']
-        self.can_hung_without_frame = json_obj['can_hung_without_frame']
+        self.can_hang_without_frame = json_obj['can_hung_without_frame']
         self.surface = json_obj['surface']  # ex. 'canvas'
         self.published_at = json_obj['published_at']
         self.updatedAt = json_obj['updatedAt']
@@ -74,7 +74,10 @@ class Art(object):
         self.sold = json_obj['sold']
         self.depth = json_obj['depth']
         self.no_of_likes = json_obj['no_of_likes']
-        #,metadata,profile,medium,description,collection,tryout_collection,can_commission_diff_size,is_primary,recommended_matted_border,collection_index,published
+        self.artist = json_obj['metadata']['public_id'].split('/')[0]
+        self.medium = json_obj['medium']
+        self.recommended_matted_border = json_obj['recommended_matted_border']
+        #,metadata,profile,description,collection,is_primary,collection_index,published
 
     def show_image(self):
         sns.set_style("whitegrid", {'axes.grid' : False})
