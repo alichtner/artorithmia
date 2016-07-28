@@ -4,7 +4,7 @@ from scipy import misc
 from collections import Counter
 from colorutils import Color
 from colorthief import ColorThief
-from Pillow import Image
+from PIL import Image
 from skimage import color, io
 import seaborn as sns
 import cv2
@@ -36,15 +36,32 @@ class Art(object):
         INPUT: filename (ex: jpg, png)
         OUTPUT: None
         """
+
         self.filename = filename
-        self.art = Image.open(filename)
-        self.image = np.array(self.art)
+        self.image = misc.imread(filename)
+        if len(self.image.shape) != 3:
+            raise ValueError('Image is not the right dimensions')
         self.short_name = self.filename.split('/')[-1].split('.')[0]
         self.aspect_ratio = 1. * self.image.shape[1]/self.image.shape[0]
         self.extract_blur()
         self.extract_symmetry()
         self.get_rgb()
         self.get_hsv()
+
+    def build_color_features(self):
+        pass
+
+    def build_composition_features(self):
+        pass
+
+    def build_style_features(self):
+        pass
+
+    def build_content_features(self):
+        pass
+
+    def build_meta_features(self):
+        pass
 
     def parse_meta(self, json_obj):
         """
@@ -92,9 +109,9 @@ class Art(object):
 
     def get_hsv(self, plot=False):
         self.hsv_image = color.rgb2hsv(self.image)
-        self.hue_bins = self.create_hist_vector(self.hsv_image, 0, 12, (0.0, 1))
-        self.sat_bins = self.create_hist_vector(self.hsv_image, 1, 12, (0.0, 1))
-        self.val_bins = self.create_hist_vector(self.hsv_image, 2, 12, (0.0, 1))
+        self.hue_bins = self.create_hist_vector(self.hsv_image, 0, 75, (0.0, 1))
+        self.sat_bins = self.create_hist_vector(self.hsv_image, 1, 75, (0.0, 1))
+        self.val_bins = self.create_hist_vector(self.hsv_image, 2, 75, (0.0, 1))
         self.primary_hue = np.argmax(self.hue_bins)
         self.primary_sat = np.argmax(self.sat_bins)
         self.primary_val = np.argmax(self.val_bins)

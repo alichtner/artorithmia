@@ -60,4 +60,7 @@ Today was spent validating some of the ideas I will be using to cluster, discove
     - `home_collection`, `weight`, `ACL`, `home_collection_index`, `supplimentaryImages`, `tryout_collection`, `tryout_collection_index`, `can_commission_diff_size`
 
   - Building a method so that a subset or all of the attributes of an Art object can be built up into a feature matrix
-    - I would like to be able to change features on the fly without going into the Art() class code. For example, I'd like to be able to test how it clusters using only color related methods, sometimes with only metadata related features. Perhaps it still makes sense to just output everything and then drop the columns that aren't of interest to me. 
+    - I would like to be able to change features on the fly without going into the Art() class code. For example, I'd like to be able to test how it clusters using only color related methods, sometimes with only metadata related features. Perhaps it still makes sense to just output everything and then drop the columns that aren't of interest to me.
+
+## Day 4
+- run PCA on extracted features from deep learning and images

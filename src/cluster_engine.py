@@ -28,7 +28,7 @@ class ClusterArt(object):
     def __init__(self):
         self.artwork = []
         self.n_artworks = None
-        self.n_clusters = 5
+        self.n_clusters = 3
         self.model = KMeans(self.n_clusters)
         self.features = None
         self.cluster_fit = None
@@ -39,13 +39,18 @@ class ClusterArt(object):
     def load_collection(self, images_filepath, add_meta=False):
         # add functionality to ignore .DS_store file
         for image in os.listdir(images_filepath):
-            art = Art()
-            art.load_image(images_filepath + image)
-            if add_meta is True:
-                image_meta = image.replace('_', '/').split('.')[0]
-                art.parse_meta(self.metadata['metadata']['public_id'] == image_meta)
-            self.artwork.append(art)
-        self.n_artworks = len(self.artwork)
+            if image != '.DS_Store':
+                print image
+                art = Art()
+                try:
+                    art.load_image(images_filepath + image)
+                except ValueError:
+                    print 'Wrong dimensions'
+                if add_meta is True:
+                    image_meta = image.replace('_', '/').split('.')[0]
+                    art.parse_meta(self.metadata['metadata']['public_id'] == image_meta)
+                self.artwork.append(art)
+            self.n_artworks = len(self.artwork)
         print '{} images added to collection'.format(len(os.listdir(images_filepath)))
 
     def load_json(self, json_filepath):
@@ -53,10 +58,12 @@ class ClusterArt(object):
             self.metadata = json.load(f)
 
     def make_feature_row(self, art):
-        single_values = np.array([art.symmetry, art.bluriness, art.aspect_ratio])
-        return np.concatenate((single_values, art.red_bins, art.grn_bins,
-                               art.blue_bins, art.hue_bins, art.sat_bins,
-                               art.val_bins))
+        single_values = np.array([art.primary_hue, art.primary_sat, art.primary_val,
+                                  art.symmetry, art.bluriness, art.aspect_ratio])
+        return single_values
+        #np.concatenate((single_values, art.red_bins, art.grn_bins,
+                              # art.blue_bins, art.hue_bins, art.sat_bins,
+                              # art.val_bins))
 
     def build_features(self):
         self.no_features = self.make_feature_row(self.artwork[0]).shape[0]
@@ -153,7 +160,7 @@ class ClusterArt(object):
                         self.cluster_fit.cluster_centers_, x, y)
 
 if __name__ == '__main__':
-    f = 'collections/shard/'
+    f = 'collections/drizl/all_small/'
     cluster = ClusterArt()
     cluster.load_collection(f)
     cluster.build_features()
