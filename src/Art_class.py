@@ -10,6 +10,8 @@ import seaborn as sns
 import cv2
 import os
 
+import art_plot as viz
+
 
 class Art(object):
     """
@@ -87,11 +89,16 @@ class Art(object):
         self.grn_bins = self.create_hist_vector(self.image, 1, 255, (0.0, 255))
         self.blue_bins = self.create_hist_vector(self.image, 2, 255, (0.0, 255))
 
-    def get_hsv(self):
+    def get_hsv(self, plot=False):
         self.hsv_image = color.rgb2hsv(self.image)
-        self.hue_bins = self.create_hist_vector(self.hsv_image, 0, 50, (0.0, 1))
-        self.sat_bins = self.create_hist_vector(self.hsv_image, 1, 50, (0.0, 1))
-        self.val_bins = self.create_hist_vector(self.hsv_image, 2, 50, (0.0, 1))
+        self.hue_bins = self.create_hist_vector(self.hsv_image, 0, 12, (0.0, 1))
+        self.sat_bins = self.create_hist_vector(self.hsv_image, 1, 12, (0.0, 1))
+        self.val_bins = self.create_hist_vector(self.hsv_image, 2, 12, (0.0, 1))
+        self.primary_hue = np.argmax(self.hue_bins)
+        self.primary_sat = np.argmax(self.sat_bins)
+        self.primary_val = np.argmax(self.val_bins)
+        if plot is True:
+            viz.plot_hsv(self.hsv_image)
 
     def create_hist_vector(self, image, channel, bins, rng):
         counts, _ = np.histogram(image[:, :, channel].flatten(), bins, rng)
@@ -154,6 +161,7 @@ class Art(object):
         color_thief = ColorThief(self.filename)
         # get the dominant color
         dominant_color = color_thief.get_color(quality=1)
+        print dominant_color
         palette = color_thief.get_palette(color_count=color_count)
         if plot is True:
             fname = 'plots/' + self.short_name + '_palette.png'

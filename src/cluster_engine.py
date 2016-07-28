@@ -15,6 +15,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import pairwise_distances_argmin_min
 
 from Art_class import Art
+import art_plot as viz
 
 
 class ClusterArt(object):
@@ -26,6 +27,7 @@ class ClusterArt(object):
     """
     def __init__(self):
         self.artwork = []
+        self.n_artworks = None
         self.n_clusters = 5
         self.model = KMeans(self.n_clusters)
         self.features = None
@@ -43,6 +45,7 @@ class ClusterArt(object):
                 image_meta = image.replace('_', '/').split('.')[0]
                 art.parse_meta(self.metadata['metadata']['public_id'] == image_meta)
             self.artwork.append(art)
+        self.n_artworks = len(self.artwork)
         print '{} images added to collection'.format(len(os.listdir(images_filepath)))
 
     def load_json(self, json_filepath):
@@ -84,6 +87,47 @@ class ClusterArt(object):
         print "For n_clusters = {} \n The average silhouette_score is : {}"\
               .format(self.n_clusters, silhouette_avg)
 
+    def show_opposites(self, feature):
+        self.artwork.sort(key=lambda x: x.feature, reverse=True)
+        print self.artwork[0].feature
+        self.artwork[0].show_image()
+        print self.artwork[-1].feature
+        self.artwork[-1].show_image()
+
+    def plot_art_by_color(self, no_pieces=5):
+        """
+        Plot art by decreasing hue red -> blue -> red
+        !!! (it's a wheel rememeber stupid!)
+        """
+        self.artwork.sort(key=lambda x: x.primary_hue, reverse=True)
+        for idx in xrange(0, self.n_artworks, self.n_artworks/no_pieces):
+            print self.artwork[idx].primary_hue
+            self.artwork[idx].show_image()
+            plt.plot(self.artwork[idx].hue_bins)
+            plt.show()
+
+    def plot_art_by_saturation(self, no_pieces=5):
+        """
+        Plot art by decreasing saturation
+        """
+        self.artwork.sort(key=lambda x: x.primary_sat, reverse=True)
+        for idx in xrange(0, self.n_artworks, self.n_artworks/no_pieces):
+            print self.artwork[idx].primary_sat
+            self.artwork[idx].show_image()
+            plt.plot(self.artwork[idx].sat_bins)
+            plt.show()
+
+    def plot_art_by_value(self, no_pieces=5):
+        """
+        Plot art by decreasing value
+        """
+        self.artwork.sort(key=lambda x: x.primary_val, reverse=True)
+        for idx in xrange(0, self.n_artworks, self.n_artworks/no_pieces):
+            print self.artwork[idx].primary_val
+            self.artwork[idx].show_image()
+            plt.plot(self.artwork[idx].val_bins)
+            plt.show()
+
     def get_exemplar_images(self, plot=False):
         """
         Find images closest to cluster centers
@@ -104,28 +148,12 @@ class ClusterArt(object):
         """
         pass
 
-
     def plot_kmeans(self, x, y):
-        d = {0: 'r', 1: 'b', 2: 'g', 3: 'c', 4: 'm'}
-
-        colors = []
-        for i in self.cluster_labels:
-            colors.append(d[i])
-        # plot the kmeans clustering
-        plt.figure(figsize=(10, 6))
-        plt.xlim(self.features[:, x].min() - 0.1 * self.features[:, x].max(),
-                 self.features[:, x].max() + 0.1 * self.features[:, x].max())
-        plt.ylim(self.features[:, y].min() - 0.1 * self.features[:, y].max(),
-                 self.features[:, y].max() + 0.1 * self.features[:, y].max())
-        plt.scatter(self.features[:, x], self.features[:, y],
-                    c=colors, edgecolors='face', alpha=0.3)
-        plt.scatter(self.cluster_fit.cluster_centers_[:, x],
-                    self.cluster_fit.cluster_centers_[:, y],
-                    c=['r', 'b', 'g', 'c', 'm'], s=50)
-        plt.show()
+        viz.plot_kmeans(self.features, self.cluster_labels,
+                        self.cluster_fit.cluster_centers_, x, y)
 
 if __name__ == '__main__':
-    f = 'collections/test_small/'
+    f = 'collections/shard/'
     cluster = ClusterArt()
     cluster.load_collection(f)
     cluster.build_features()
