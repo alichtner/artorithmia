@@ -35,6 +35,7 @@ class ClusterArt(object):
         self.metadata = None
 
     def load_collection(self, images_filepath, add_meta=False):
+        # add functionality to ignore .DS_store file
         for image in os.listdir(images_filepath):
             art = Art()
             art.load_image(images_filepath + image)
@@ -48,13 +49,24 @@ class ClusterArt(object):
         with open(json_filepath) as f:
             self.metadata = json.load(f)
 
+    def make_feature_row(self, art):
+        single_values = np.array([art.symmetry, art.bluriness, art.aspect_ratio])
+        return np.concatenate((single_values, art.red_bins, art.grn_bins,
+                               art.blue_bins, art.hue_bins, art.sat_bins,
+                               art.val_bins))
+
     def build_features(self):
-        # create simple feature set of symmetry, blurriness, aspect_ratio
-        self.features = np.zeros((1, 3))
+        self.no_features = self.make_feature_row(self.artwork[0]).shape[0]
+        self.features = np.empty((1, self.no_features))
         for art in self.artwork:
-            row = np.array([art.symmetry, art.bluriness,
-                            art.aspect_ratio]).reshape((1, 3))
+            row = self.make_feature_row(art).reshape(1, self.no_features)
+
             self.features = np.concatenate((self.features, row), axis=0)
+
+    def get_all_features(self):
+        # for art in self.artwork:
+        #   features = art.__dict__.values()
+        pass
 
     def fit(self):
         scaler = StandardScaler()
@@ -113,7 +125,7 @@ class ClusterArt(object):
         plt.show()
 
 if __name__ == '__main__':
-    f = 'collections/drizl/resize/test_small/'
+    f = 'collections/test_small/'
     cluster = ClusterArt()
     cluster.load_collection(f)
     cluster.build_features()

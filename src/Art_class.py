@@ -21,16 +21,6 @@ class Art(object):
     """
     def __init__(self):
         self.filename = None
-        self.short_name = None
-        self.image = None
-        self.r_hist = None
-        self.g_hist = None
-        self.b_hist = None
-        self.bluriness = None
-        self.aspect_ratio = None
-        self.medium = None
-        self.symmetry = None
-        self.size = None
 
     def __str__(self):
         str = """\n\033[1m{}\033[0m is an instance of an Art object \
@@ -50,7 +40,8 @@ class Art(object):
         self.aspect_ratio = 1. * self.image.shape[1]/self.image.shape[0]
         self.extract_blur()
         self.extract_symmetry()
-        return None
+        self.get_rgb()
+        self.get_hsv()
 
     def parse_meta(self, json_obj):
         """
@@ -80,31 +71,42 @@ class Art(object):
         #,metadata,profile,description,collection,is_primary,collection_index,published
 
     def show_image(self):
-        sns.set_style("whitegrid", {'axes.grid' : False})
+        sns.set_style("whitegrid", {'axes.grid': False})
         plt.imshow(self.image)
         plt.show()
-        return None
 
     def show_thumbnail(self):
         Image.open(self.image).thumbnail((200, 200))
         return None
 
-    def extract_colors(self, n_colors=5):
+    def get_colors(self, n_colors=5):
         pass
 
-    def to_hsv(self, plot=False):
-        self.image = color.rgb2hsv(self.image)
+    def get_rgb(self):
+        self.red_bins = self.create_hist_vector(self.image, 0, 255, (0.0, 255))
+        self.grn_bins = self.create_hist_vector(self.image, 1, 255, (0.0, 255))
+        self.blue_bins = self.create_hist_vector(self.image, 2, 255, (0.0, 255))
 
-    def to_rgb(self, plot=False):
-        self.image = color.hsv2rgb(self.image)
-        if plot is True:
-            self.plot_rgb()
+    def get_hsv(self):
+        self.hsv_image = color.rgb2hsv(self.image)
+        self.hue_bins = self.create_hist_vector(self.hsv_image, 0, 50, (0.0, 1))
+        self.sat_bins = self.create_hist_vector(self.hsv_image, 1, 50, (0.0, 1))
+        self.val_bins = self.create_hist_vector(self.hsv_image, 2, 50, (0.0, 1))
 
-    def extract_blur(self):
+    def create_hist_vector(self, image, channel, bins, rng):
+        counts, _ = np.histogram(image[:, :, channel].flatten(), bins, rng)
+        return 1. * counts/counts.max()  # Scale the data
+
+    def extract_blur(self, plot=False):
         # do on grayscale
         # check what the mean would give instead of variance
-        self.bluriness = cv2.Laplacian(self.image, cv2.CV_64F).var()
-        lap = cv2.Laplacian(self.image, cv2.CV_64F)
+        self.bluriness = cv2.Laplacian(color.rgb2gray(self.image),
+                                       cv2.CV_64F).var()
+        if plot is True:
+            self.lap = cv2.Laplacian(color.rgb2gray(self.image), cv2.CV_64F)
+            plt.imshow(self.lap)
+            plt.title('Laplacian of {}'.format(self.short_name))
+            plt.show()
 
     def extract_symmetry(self):
         if len(self.image.shape) == 3:
@@ -122,7 +124,8 @@ class Art(object):
             right = self.image[:, width/2:]
         left_gray = color.rgb2gray(left)
         right_gray = color.rgb2gray(right)
-        self.symmetry = np.abs(left_gray - np.fliplr(right_gray)).sum()/(pixels/1.*2)
+        self.symmetry = np.abs(left_gray -
+                               np.fliplr(right_gray)).sum()/(pixels/1.*2)
 
     def extract_movement(self):
         pass
@@ -172,7 +175,6 @@ if __name__ == '__main__':
         art = Art()
         art.load_image(i)
         art.extract_blur()
-        print art
         print art.short_name, 'blurriness is: ', art.bluriness
         art.get_palette(plot=True)
         print art.aspect_ratio
