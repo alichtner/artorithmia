@@ -50,3 +50,7 @@ def plot_kmeans(features, labels, centers, x, y):
                 centers[:, y],
                 c=['r', 'b', 'g', 'c', 'm'], s=50)
     plt.show()
+
+
+def plot_cluster_network(distances, labels, centers):
+    pass

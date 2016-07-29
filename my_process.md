@@ -101,3 +101,12 @@ Today was spent validating some of the ideas I will be using to cluster, discove
     - make sure not to present the same pieces to the user again
   9. Present the user [B1_new] and [B2_new]
   10. Repeat steps 6 - 9 until a single metric wins out each time
+
+### Visualize Graphlab clusters
+  - compute distance metric for each of the images with the clusters that it is in as well as between cluster centers
+  - plot this
+
+# Day 5
+- Started the day playing with where are the artists among the clusters, this could be an indication of the clustering, are artists being clustered together sort of thing
+  - the attribute I'm calculating is called `ClusterArt.artist_cluster_score` it is an average of the maximum number of pieces that an artist has in a single cluster divided by the total number that artist has. If they have 10 pieces and all 10 are in 1 cluster, their score will be 1.0. If they have 10 pieces and each of them is in 1 of 10 clusters, their score will be 1/10. I have also saved the dictionary used to calculate this value `ClusterArt.art_dict` where the keys are the artists and the value is the individual score for that artist. This in a way is a proxy for how versatile an artist is (assuming my clustering is good).
+- Used `sklearn.metrics.DistanceMetric` to calculate the euclidean distance of vectors from my features. This is output in a rather ugly png file using the `test_clustering_engine` ipython notebook

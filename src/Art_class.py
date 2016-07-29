@@ -24,11 +24,6 @@ class Art(object):
     def __init__(self):
         self.filename = None
 
-    def __str__(self):
-        str = """\n\033[1m{}\033[0m is an instance of an Art object \
-        \n\033[1maspect ratio\033[0m = {}\n"""
-        return str.format(self.short_name, self.aspect_ratio)
-
     def load_image(self, filename):
         """
         Load image file and build attributes
@@ -41,7 +36,6 @@ class Art(object):
         if len(self.image.shape) != 3:
             raise ValueError('Image is not the right dimensions')
         self.short_name = self.filename.split('/')[-1].split('.')[0]
-
         self.build_color_features()
         self.build_composition_features()
         self.build_style_features()
@@ -52,9 +46,27 @@ class Art(object):
         self.get_rgb()
         self.get_hsv()
 
+        self.primary_hue = np.argmax(self.hue_bins)
+        self.avg_hue = self.hue_bins.mean()
+        self.hue_var = self.hue_bins.var()
+
+        self.primary_sat = np.argmax(self.sat_bins)
+        self.avg_sat = self.sat_bins.mean()
+        self.sat_var = self.sat_bins.var()
+
+        self.primary_val = np.argmax(self.val_bins)
+        self.avg_val = self.val_bins.mean()
+        self.val_var = self.val_bins.var()
+
+        self.colorfulness = None
+        self.no_colors = None
+        self.size_color_blocks_avg = None
+        self.size_color_blocks_var = None
+
     def build_composition_features(self):
         self.aspect_ratio = 1. * self.image.shape[1]/self.image.shape[0]
         self.extract_symmetry()
+        self.image_moment = None
 
     def build_style_features(self):
         self.extract_blur()
@@ -63,7 +75,7 @@ class Art(object):
         pass
 
     def build_meta_features(self):
-        pass
+        self.artist = self.short_name.split('_')[0]
 
     def parse_meta(self, json_obj):
         """
@@ -115,9 +127,6 @@ class Art(object):
         self.hue_bins = self.create_hist_vector(self.hsv_image, 0, 75, (0.0, 1))
         self.sat_bins = self.create_hist_vector(self.hsv_image, 1, 75, (0.0, 1))
         self.val_bins = self.create_hist_vector(self.hsv_image, 2, 75, (0.0, 1))
-        self.primary_hue = np.argmax(self.hue_bins)
-        self.primary_sat = np.argmax(self.sat_bins)
-        self.primary_val = np.argmax(self.val_bins)
         if plot is True:
             viz.plot_hsv(self.hsv_image)
 
@@ -138,7 +147,7 @@ class Art(object):
 
     def extract_symmetry(self):
         if len(self.image.shape) == 3:
-            height, width, channels = self.image.shape
+            height, width, _ = self.image.shape
         else:
             height, width = self.image.shape
         if width % 2 != 0:
@@ -196,6 +205,13 @@ class Art(object):
                 plt.savefig(fname)
             else:
                 plt.show()
+
+    def __str__(self):
+        str = """
+              \n\033[1m{}\033[0m is an instance of an Art object \
+              \n\033[1maspect ratio\033[0m = {}\n
+              """
+        return str.format(self.short_name, self.aspect_ratio)
 
 
 if __name__ == '__main__':
