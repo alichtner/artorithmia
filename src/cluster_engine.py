@@ -28,7 +28,7 @@ class ClusterArt(object):
     def __init__(self):
         self.artwork = []
         self.n_artworks = None
-        self.n_clusters = 3
+        self.n_clusters = 4
         self.model = KMeans(self.n_clusters)
         self.features = None
         self.cluster_fit = None

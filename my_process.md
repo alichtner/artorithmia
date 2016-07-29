@@ -7,6 +7,7 @@
 - Build Recommender
 - Build Webapp
 - Build API
+- Calculate distances between art from the Graphlab data and show the clustering
 
 ### Mini Task List
 - import json metadata for the image
@@ -34,7 +35,7 @@ Today was spent validating some of the ideas I will be using to cluster, discove
 - To resize images above a certain threshold and then save to a new directory with the same filename as before
   - `mogrify -path <output folder> -resize <width>x\> *.jpg`
 - contacted Michael Schultheis (a math-based artist in Ballard)
-  - (http://www.michaelschultheis.com/)[Michael Schultheis Artist]
+  - (http://www.michaelschultheis.com/) [Michael Schultheis Artist]
 
 #### Google Hangout with Drizl team:
   - What did you cluster on before?
@@ -53,14 +54,50 @@ Today was spent validating some of the ideas I will be using to cluster, discove
 
   - Ran the pre-built clustering engine that Drizl had built. It uses extracted features from Turi's image_net. The script takes a very LONG time to run. It also appears as though the images are scaled to be square before running through the feature extraction matrix. Graphlab extracted 4096 features from each image.
 
-  - more color research (http://colorizer.org/)[Colorizer and HSV]
+  - more color research (http://colorizer.org/) [Colorizer and HSV]
   - **ask what the `primary_index` is in the artwork.json**
   - **Ignored Drizl Meta:**
     - it seems like these won't necessarily play a role in clustering art or helping someone discover the art that they might like
-    - `home_collection`, `weight`, `ACL`, `home_collection_index`, `supplimentaryImages`, `tryout_collection`, `tryout_collection_index`, `can_commission_diff_size`
+    - `home_collection`, `weight`, `ACL`, `home_collection_index`, `supplimentaryImages`, `tryout_collection`, `tryout_collection_index`, `can_commission_diff_size`, ,collection_index,published, profile,description, collection,
 
   - Building a method so that a subset or all of the attributes of an Art object can be built up into a feature matrix
     - I would like to be able to change features on the fly without going into the Art() class code. For example, I'd like to be able to test how it clusters using only color related methods, sometimes with only metadata related features. Perhaps it still makes sense to just output everything and then drop the columns that aren't of interest to me.
 
 ## Day 4
 - run PCA on extracted features from deep learning and images
+
+- Met with Patricia and RC from Drizl to talk about assumptions about artwork and what possible features would be most important to her. We really want to try get things like mood and emotion out of the project. Extract different color palettes from a picture (look at (http://www.kuler.com) [kuler.com]). The recommender shouldn't turn people off from the works. It's dangerous to make bad assumptions. Patricia in particularly liked the `colorfulness` metric.
+
+### Features
+#### Color_Features
+  - primary_hue, secondary_hue, saturation_mean, saturation_var, value_mean, value_var, **colorfulness** (hue_hist.var() if low it is colorful, if high it is more monocolor), size_of_colored_sections
+    - get `size_of_colored_sections` from taking a grayscale and doing some median filters or something to get an image with a reasonable amount of colors, then count the average size that each color seems to occupy
+
+#### Composition
+  - symmetry (vert + horiz), focus (x, y) - this might be the location of the highest detail or where the most weight of the image is located, aspect_ratio, movement (average of the direction of the edges in a picture)
+
+#### Style
+  - softness (laplacian or similar), geometricness (not sure how to get this), texture (busyness, think Bragg's law and x-ray diffraction, I should probably run this on bins of the image to see if there are areas of texture)
+
+#### Content (Google Vision API)
+  - categorical (portrait, landscape, still-life, abstract, cityscape, animal, sentiment?)
+
+#### Meta
+  - price, size, medium, framed, matted, artist, is_primary
+
+### Bayesian recommender
+- Required:
+  - Image Database
+  - Metrics (these could be individual features or combinations of features)
+- Process:
+  1. For each user generate a set of reasonable assumptions for the metrics they use to like something
+  2. Pick a random image [A]
+  3. Randomly choose two metrics
+  4. Find pieces most similar to [A] using the two metrics [B1] and [B2]
+  5. Present the user [B1] and [B2]
+  6. Based on the one they like, update the prior distributions to reflect the metric they probably used to select a work
+  7. Draw randomly from each metric's distributions and record the winner
+  8. Use the winning metric and another metric chosen at random to find pieces most similar to [A] using the two metrics [B1_new] and [B2_new]
+    - make sure not to present the same pieces to the user again
+  9. Present the user [B1_new] and [B2_new]
+  10. Repeat steps 6 - 9 until a single metric wins out each time

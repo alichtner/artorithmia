@@ -36,26 +36,28 @@ class Art(object):
         INPUT: filename (ex: jpg, png)
         OUTPUT: None
         """
-
         self.filename = filename
         self.image = misc.imread(filename)
         if len(self.image.shape) != 3:
             raise ValueError('Image is not the right dimensions')
         self.short_name = self.filename.split('/')[-1].split('.')[0]
-        self.aspect_ratio = 1. * self.image.shape[1]/self.image.shape[0]
-        self.extract_blur()
-        self.extract_symmetry()
+
+        self.build_color_features()
+        self.build_composition_features()
+        self.build_style_features()
+        self.build_content_features()
+        self.build_meta_features()
+
+    def build_color_features(self):
         self.get_rgb()
         self.get_hsv()
 
-    def build_color_features(self):
-        pass
-
     def build_composition_features(self):
-        pass
+        self.aspect_ratio = 1. * self.image.shape[1]/self.image.shape[0]
+        self.extract_symmetry()
 
     def build_style_features(self):
-        pass
+        self.extract_blur()
 
     def build_content_features(self):
         pass
@@ -88,7 +90,8 @@ class Art(object):
         self.artist = json_obj['metadata']['public_id'].split('/')[0]
         self.medium = json_obj['medium']
         self.recommended_matted_border = json_obj['recommended_matted_border']
-        #,metadata,profile,description,collection,is_primary,collection_index,published
+        #,metadata,colors, is_primary (artists key piece of art)
+        # look at cloudinary colors
 
     def show_image(self):
         sns.set_style("whitegrid", {'axes.grid': False})
