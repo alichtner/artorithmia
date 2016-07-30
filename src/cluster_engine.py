@@ -54,20 +54,29 @@ class ClusterArt(object):
                     print 'Wrong dimensions'
                 self.artwork.append(art)
             self.n_artworks = len(self.artwork)
-        print '{} images added to collection'.format(len(os.listdir(images_filepath)))
-        self.build_features()
+        print '{} images added to collection'.format(self.n_artworks)
         print " --- Building feature set --- "
+        self.build_features()
+
 
     def load_collection_from_json(self, json_file, img_filepath=None):
-        # use the json file from cloudinary to direct how the collection should be built
+        # use the json file from cloudinary to direct how the collection
+        # should be built
         drizl = pd.read_json(json_file, orient='records')
         for row in xrange(len(drizl)):
             try:
+                img_name = drizl['results'][row]['metadata']['public_id'].replace('/', '_')
                 art = Art()
-                art.load_image(img_filepath + drizl['results'][row]['metadata']['public_id'].replace('/', '_') + '.jpg')
+                art.load_image(img_filepath + img_name + '.jpg')
                 print 'Generating Features for: ', img_name
+                self.artwork.append(art)
             except Exception:
                 print 'No such file or directory'
+        self.n_artworks = len(self.artwork)
+        print '{} images added to collection'.format(self.n_artworks)
+        print " --- Building feature set --- "
+        self.build_features()
+
 
     def make_feature_row(self, art):
         single_values = np.array([art.avg_hue, art.avg_sat, art.avg_val, art.hue_var, art.sat_var, art.val_var,
@@ -209,11 +218,10 @@ if __name__ == '__main__':
     cluster = ClusterArt()
     #cluster.load_collection_from_directory(f)
     cluster.load_collection_from_json('data/Artwork.json', 'collections/drizl/all_small/')
-    #cluster.build_features()
-    #cluster.fit()
-    #cluster.predict()
-    #cluster.score_artist_clusters()
-    #features, labels, centers = cluster.return_all()
-    #cluster.silhouette()
-    #cluster.get_exemplar_images(plot=True)
-    #cluster.plot_kmeans(6, 8)
+    cluster.fit()
+    cluster.predict()
+    cluster.score_artist_clusters()
+    features, labels, centers = cluster.return_all()
+    cluster.silhouette()
+    cluster.get_exemplar_images(plot=True)
+    cluster.plot_kmeans(6, 8)
