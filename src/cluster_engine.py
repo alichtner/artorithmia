@@ -16,6 +16,7 @@ from sklearn.metrics import pairwise_distances_argmin_min
 from sklearn.neighbors import DistanceMetric
 from collections import defaultdict
 from collections import Counter
+import pandas as pd
 
 
 from Art_class import Art
@@ -33,7 +34,7 @@ class ClusterArt(object):
         self.artwork = []
         self.n_artworks = None
         self.artists = []
-        self.n_clusters = 7
+        self.n_clusters = 5
         self.model = KMeans(self.n_clusters)
         self.features = None
         self.cluster_fit = None
@@ -41,7 +42,8 @@ class ClusterArt(object):
         self.exemplar_images = None
         self.metadata = None
 
-    def load_collection(self, images_filepath, add_meta=False):
+    def load_collection_from_directory(self, images_filepath):
+        # add work from directory or work from csv option
         # add functionality to ignore .DS_store file
         for image in os.listdir(images_filepath):
             if image != '.DS_Store':
@@ -50,18 +52,22 @@ class ClusterArt(object):
                     art.load_image(images_filepath + image)
                 except ValueError:
                     print 'Wrong dimensions'
-                if add_meta is True:
-                    image_meta = image.replace('_', '/').split('.')[0]
-                    art.parse_meta(self.metadata['metadata']['public_id'] == image_meta)
                 self.artwork.append(art)
             self.n_artworks = len(self.artwork)
         print '{} images added to collection'.format(len(os.listdir(images_filepath)))
         self.build_features()
         print " --- Building feature set --- "
 
-    def load_json(self, json_filepath):
-        with open(json_filepath) as f:
-            self.metadata = json.load(f)
+    def load_collection_from_json(self, json_file, img_filepath=None):
+        # use the json file from cloudinary to direct how the collection should be built
+        drizl = pd.read_json(json_file, orient='records')
+        for row in xrange(len(drizl)):
+            try:
+                art = Art()
+                art.load_image(img_filepath + drizl['results'][row]['metadata']['public_id'].replace('/', '_') + '.jpg')
+                print 'Generating Features for: ', img_name
+            except Exception:
+                print 'No such file or directory'
 
     def make_feature_row(self, art):
         single_values = np.array([art.avg_hue, art.avg_sat, art.avg_val, art.hue_var, art.sat_var, art.val_var,
@@ -73,9 +79,12 @@ class ClusterArt(object):
                               # art.val_bins))
 
     def build_features(self):
-        self.no_features = self.make_feature_row(self.artwork[0]).shape[0]
-        self.features = np.empty((1, self.no_features))
-        for art in self.artwork:
+        # Create a numpy array of features with each row being an image and the columns being feature values
+        # Also initialize a list of artists for each work to be used when scoring the clustering
+        self.no_features = self.make_feature_row(self.artwork[0]).shape[0] # create first feature row to append to
+        self.artists = [self.artwork[0].artist] # create first artist
+        self.features = self.make_feature_row(self.artwork[0]).reshape(1,self.no_features)
+        for art in self.artwork[1:len(self.artwork)]:
             self.artists.append(art.artist) # create list of artists
             row = self.make_feature_row(art).reshape(1, self.no_features)
 
@@ -91,7 +100,7 @@ class ClusterArt(object):
         self.features = scaler.fit_transform(self.features)
         self.cluster_fit = self.model.fit(self.features)
         print ('-- Running clustering on {} piece collection --'
-               .format(len(self.artwork)))
+               .format(self.n_artworks))
         print self.model.score(self.features)
 
     def predict(self):
@@ -196,14 +205,15 @@ class ClusterArt(object):
 
 
 if __name__ == '__main__':
-    f = 'collections/drizl/all_small/'
+    f = 'collections/test_small/'
     cluster = ClusterArt()
-    cluster.load_collection(f)
-    cluster.build_features()
-    cluster.fit()
-    cluster.predict()
-    cluster.score_artist_clusters()
+    #cluster.load_collection_from_directory(f)
+    cluster.load_collection_from_json('data/Artwork.json', 'collections/drizl/all_small/')
+    #cluster.build_features()
+    #cluster.fit()
+    #cluster.predict()
+    #cluster.score_artist_clusters()
     #features, labels, centers = cluster.return_all()
     #cluster.silhouette()
     #cluster.get_exemplar_images(plot=True)
-    #cluster.plot_kmeans(0, 1)
+    #cluster.plot_kmeans(6, 8)

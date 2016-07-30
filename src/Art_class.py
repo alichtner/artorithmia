@@ -77,31 +77,31 @@ class Art(object):
     def build_meta_features(self):
         self.artist = self.short_name.split('_')[0]
 
-    def parse_meta(self, json_obj):
+    def parse_meta(self, meta_dict):
         """
         Takes a json object and parses the values into attributes
         """
-        self.styles = json_obj['styles']
-        self.can_hang_without_frame = json_obj['can_hung_without_frame']
-        self.surface = json_obj['surface']  # ex. 'canvas'
-        self.published_at = json_obj['published_at']
-        self.updatedAt = json_obj['updatedAt']
-        self.createdAt = json_obj['createdAt']
-        self.retail_price = json_obj['retail_price']
-        self.style_other = json_obj['style_other']  # 'floral'
-        self.objectId = json_obj['objectId']
-        self.title = json_obj['title']
-        self.is_framed = json_obj['is_framed']
-        self.width = json_obj['width']  # inches
-        self.primary_index = json_obj['primary_index']
-        self.height = json_obj['height']    # inches
-        self.public_id = json_obj['metadata']['public_id']
-        self.sold = json_obj['sold']
-        self.depth = json_obj['depth']
-        self.no_of_likes = json_obj['no_of_likes']
-        self.artist = json_obj['metadata']['public_id'].split('/')[0]
-        self.medium = json_obj['medium']
-        self.recommended_matted_border = json_obj['recommended_matted_border']
+        self.styles = meta_dict['styles']
+        self.can_hang_without_frame = meta_dict['can_hung_without_frame']
+        self.surface = meta_dict['surface']  # ex. 'canvas'
+        self.published_at = meta_dict['published_at']
+        self.updatedAt = meta_dict['updatedAt']
+        self.createdAt = meta_dict['createdAt']
+        self.retail_price = meta_dict['retail_price']
+        self.style_other = meta_dict['style_other']  # 'floral'
+        self.objectId = meta_dict['objectId']
+        self.title = meta_dict['title']
+        self.is_framed = meta_dict['is_framed']
+        self.width = meta_dict['width']  # inches
+        self.primary_index = meta_dict['primary_index']
+        self.height = meta_dict['height']    # inches
+        self.public_id = meta_dict['metadata']['public_id']
+        self.sold = meta_dict['sold']
+        self.depth = meta_dict['depth']
+        self.no_of_likes = meta_dict['no_of_likes']
+        self.artist = meta_dict['metadata']['public_id'].split('/')[0]
+        self.medium = meta_dict['medium']
+        self.recommended_matted_border = meta_dict['recommended_matted_border']
         #,metadata,colors, is_primary (artists key piece of art)
         # look at cloudinary colors
 
