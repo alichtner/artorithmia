@@ -24,7 +24,7 @@ class Art(object):
     def __init__(self):
         self.filename = None
 
-    def load_image(self, filename):
+    def load_image(self, filename, meta):
         """
         Load image file and build attributes
 
@@ -40,7 +40,7 @@ class Art(object):
         self.build_composition_features()
         self.build_style_features()
         self.build_content_features()
-        self.build_meta_features()
+        self.build_meta_features(meta)
 
     def build_color_features(self):
         self.get_rgb()
@@ -74,34 +74,46 @@ class Art(object):
     def build_content_features(self):
         pass
 
-    def build_meta_features(self):
-        self.artist = self.short_name.split('_')[0]
-
-    def parse_meta(self, meta_dict):
+    def build_meta_features(self, meta_dict):
         """
         Takes a json object and parses the values into attributes
         """
+        self.artist = self.short_name.split('_')[0]
         self.styles = meta_dict['styles']
         self.can_hang_without_frame = meta_dict['can_hung_without_frame']
         self.surface = meta_dict['surface']  # ex. 'canvas'
         self.published_at = meta_dict['published_at']
         self.updatedAt = meta_dict['updatedAt']
         self.createdAt = meta_dict['createdAt']
-        self.retail_price = meta_dict['retail_price']
         self.style_other = meta_dict['style_other']  # 'floral'
         self.objectId = meta_dict['objectId']
         self.title = meta_dict['title']
         self.is_framed = meta_dict['is_framed']
-        self.width = meta_dict['width']  # inches
         self.primary_index = meta_dict['primary_index']
+        self.width = meta_dict['width']  # inches
         self.height = meta_dict['height']    # inches
         self.public_id = meta_dict['metadata']['public_id']
-        self.sold = meta_dict['sold']
         self.depth = meta_dict['depth']
         self.no_of_likes = meta_dict['no_of_likes']
-        self.artist = meta_dict['metadata']['public_id'].split('/')[0]
         self.medium = meta_dict['medium']
         self.recommended_matted_border = meta_dict['recommended_matted_border']
+
+        self.retail_price = meta_dict['retail_price']
+        if meta_dict['retail_price'] <= 0:
+            self.retail_price = 0.0
+
+        self.sold = False
+        if 'sold' in meta_dict.keys():
+            self.sold = meta_dict['sold']
+
+        if self.width > 0:
+            self.area = 1. * self.width * self.height
+        else:
+            self.width = 0.0
+            self.height = 0.0
+            self.area = 0.0
+
+
         #,metadata,colors, is_primary (artists key piece of art)
         # look at cloudinary colors
 
@@ -124,9 +136,9 @@ class Art(object):
 
     def get_hsv(self, plot=False):
         self.hsv_image = color.rgb2hsv(self.image)
-        self.hue_bins = self.create_hist_vector(self.hsv_image, 0, 75, (0.0, 1))
-        self.sat_bins = self.create_hist_vector(self.hsv_image, 1, 75, (0.0, 1))
-        self.val_bins = self.create_hist_vector(self.hsv_image, 2, 75, (0.0, 1))
+        self.hue_bins = self.create_hist_vector(self.hsv_image, 0, 50, (0.0, 1))
+        self.sat_bins = self.create_hist_vector(self.hsv_image, 1, 50, (0.0, 1))
+        self.val_bins = self.create_hist_vector(self.hsv_image, 2, 50, (0.0, 1))
         if plot is True:
             viz.plot_hsv(self.hsv_image)
 

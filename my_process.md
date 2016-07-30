@@ -110,11 +110,22 @@ Today was spent validating some of the ideas I will be using to cluster, discove
 - Started the day playing with where are the artists among the clusters, this could be an indication of the clustering, are artists being clustered together sort of thing
   - the attribute I'm calculating is called `ClusterArt.artist_cluster_score` it is an average of the maximum number of pieces that an artist has in a single cluster divided by the total number that artist has. If they have 10 pieces and all 10 are in 1 cluster, their score will be 1.0. If they have 10 pieces and each of them is in 1 of 10 clusters, their score will be 1/10. I have also saved the dictionary used to calculate this value `ClusterArt.art_dict` where the keys are the artists and the value is the individual score for that artist. This in a way is a proxy for how versatile an artist is (assuming my clustering is good).
 - Used `sklearn.metrics.DistanceMetric` to calculate the euclidean distance of vectors from my features. This is output in a rather ugly png file using the `test_clustering_engine` ipython notebook
+- I am removing the `sold` column from the dataset since it appears to be corrupted. In some of the JSON, that key:value does not even exist. I think this is an ok assumption since, although being sold would indicate a higher value for a piece, you aren't necessarily going to want to show someone a piece if it's sold (just kidding, I added it back in and assumed anything that didn't have a value was false)
+
+### JSON meta
+- You can now load metadata from the json itself. This is fine as long as the fields are the same as the example one I have from Drizl. If the values are different I'll have to take that into consideration. The cluster engine now uses fields like price and size to cluster on as well as color values. *There are values with None in them for price and size/width/height that I have currently set to zero but they should be dealt with in some way (currently they are skewing results)*
 
 ### Webapp
 - started working on the webapp today, chose a bootstrap theme and built the directories for it
 - got a simple d3 visualization to work on the page just to have an example of how it should be
+- for the webapp, I asked RC how to actually host the images for it and I can either do it locally or host it with a service (cloudinary or similar)
 
 ### Thinking about the overall process
 - load images and metadata into a clusterArt object containing multiple art objects with calculated features (save the features)
 - cluster them
+
+### Next Steps:
+- start working on the recommender portion
+- create dummy variables for categorical values
+- check how the scaling is working with the features
+- add the final features
