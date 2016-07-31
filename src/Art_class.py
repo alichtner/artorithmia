@@ -6,7 +6,7 @@ from collections import Counter
 from colorutils import Color
 from colorthief import ColorThief
 from PIL import Image
-from skimage import color, io
+from skimage import measure, color, io
 import seaborn as sns
 import cv2
 import os
@@ -25,7 +25,7 @@ class Art(object):
     def __init__(self):
         self.filename = None
 
-    def load_image(self, filename, meta):
+    def load_image(self, filename, meta=None):
         """
         Load image file and build attributes
 
@@ -41,7 +41,8 @@ class Art(object):
         self.build_composition_features()
         self.build_style_features()
         self.build_content_features()
-        self.build_meta_features(meta)
+        if meta is not None:
+            self.build_meta_features(meta)
         self.build_labels()
 
     def build_color_features(self):
@@ -56,7 +57,7 @@ class Art(object):
         self.hue_var = self.hue_bins.var()
 
         self.primary_sat = np.argmax(self.sat_bins)
-        self.avg_sat = self.sat_bins.mean()
+        self.avg_sat = self.sat_bins.mean() # these are not right
         self.sat_var = self.sat_bins.var()
 
         self.primary_val = np.argmax(self.val_bins)
@@ -71,7 +72,14 @@ class Art(object):
     def build_composition_features(self):
         self.aspect_ratio = 1. * self.image.shape[1]/self.image.shape[0]
         self.extract_symmetry()
-        self.image_moment = None
+        i = np.zeros((20, 20), dtype=np.double)
+        i[13:17, 13:17] = 1
+        m = measure.moments(i)
+        cr = m[0, 1] / m[0, 0]
+        cc = m[1, 0] / m[0, 0]
+        self.image_central_moments = measure.moments_central(i, cr, cc)
+
+
 
     def build_style_features(self):
         self.extract_blur()
@@ -122,7 +130,8 @@ class Art(object):
         # look at cloudinary colors
 
     def build_labels(self):
-        self.labels = []
+        self.labels = {}
+        # what is the primary color label
         col_labs = [('RED-ORANGE', (2, 6)), ('ORANGE',
                     (6, 10)), ('YELLOW-ORANGE', (10, 14)), ('YELLOW', (14, 18)),
                     ('YELLOW-GREEN', (18, 21)), ('GREEN', (21, 24)),
@@ -131,9 +140,17 @@ class Art(object):
                     ('RED-VIOLET', (42, 46))]
         for col, rng in col_labs:
             if self.primary_hue > rng[0] and self.primary_hue <= rng[1]:
-                self.labels.append(col)
+                self.labels['color'] = col
         if len(self.labels) == 0:
-            self.labels.append('RED')
+            self.labels['color'] = 'RED'
+
+        # colorful or not
+        # check on the relative height of the peaks and if they are at least a certain distance from eachother
+        if self.hue_var > 0.03:
+            self.labels['colorlevel'] = "SINGLE PALETTE"
+        else:
+            self.labels['colorlevel'] = 'MULTICOLOR'
+
 
     def show_thumbnail(self):
         pass

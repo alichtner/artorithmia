@@ -166,7 +166,8 @@ class ClusterArt(object):
         # score artists in clusters
         # if an artists' work is all in one cluster give a score of 1
         # need way to penalize by the number of clusters
-        # also this doesn't take into account if an artist has entirely different styles in their collection
+        # also this doesn't take into account if an artist has entirely
+        # different styles in their collection
         self.art_dict = defaultdict(list)
         for idx, artist in enumerate(self.artists):
             if artist not in self.art_dict:
@@ -175,7 +176,8 @@ class ClusterArt(object):
                 self.art_dict[artist].append(self.cluster_labels[idx])
         for artist in self.art_dict.keys():
             self.art_dict[artist] = Counter(self.art_dict[artist])
-            self.art_dict[artist] = 1.*max(self.art_dict[artist].values())/sum(self.art_dict[artist].values())
+            self.art_dict[artist] = (1.*max(self.art_dict[artist].values()) /
+                                     sum(self.art_dict[artist].values()))
         return sum(self.art_dict.values())/float(len(self.art_dict.values()))
 
     def calc_art_distance(self):
@@ -207,14 +209,19 @@ class ClusterArt(object):
             for c in self.exemplar_images:
                 self.artwork[c].show_image()
 
-    def more_like_this(self, cluster=0, n_images=3):
+    def more_like_this(self, clusters=None, n_images=3):
         """
         Return n_images from a cluster
 
         INPUT: n_images (images to return), cluster (cluster label)
         OUTPUT: images from cluster
         """
-        pass
+        for cluster in xrange(self.n_clusters):
+            # maybe shuffle the artwork here
+            cluster_list = [idx for idx, lab in enumerate(self.cluster_labels)
+                            if lab == cluster]
+            for idx in xrange(n_images):
+                self.artwork[cluster_list[idx]].show_image()
 
     def plot_kmeans(self, x, y):
         viz.plot_kmeans(self.features, self.cluster_labels,
@@ -225,7 +232,8 @@ if __name__ == '__main__':
     f = 'collections/test_small/'
     cluster = ClusterArt()
     #cluster.load_collection_from_directory(f)
-    cluster.load_collection_from_json('data/Artwork.json', 'collections/drizl/all_small/')
+    cluster.load_collection_from_json('data/Artwork.json',
+                                      'collections/drizl/all_small/')
     cluster.run()
     features, labels, centers = cluster.return_all()
     cluster.silhouette()
