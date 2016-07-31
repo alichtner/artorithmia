@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import misc
+from scipy import signal
 from collections import Counter
 from colorutils import Color
 from colorthief import ColorThief
@@ -41,8 +42,12 @@ class Art(object):
         self.build_style_features()
         self.build_content_features()
         self.build_meta_features(meta)
+        self.build_labels()
 
     def build_color_features(self):
+        """
+        Extract color related features from each piece of art.
+        """
         self.get_rgb()
         self.get_hsv()
 
@@ -97,15 +102,15 @@ class Art(object):
         self.no_of_likes = meta_dict['no_of_likes']
         self.medium = meta_dict['medium']
         self.recommended_matted_border = meta_dict['recommended_matted_border']
-
+        # get retail price
         self.retail_price = meta_dict['retail_price']
         if meta_dict['retail_price'] <= 0:
             self.retail_price = 0.0
-
+        # get sold status
         self.sold = False
         if 'sold' in meta_dict.keys():
             self.sold = meta_dict['sold']
-
+        # set size characteristics
         if self.width > 0:
             self.area = 1. * self.width * self.height
         else:
@@ -113,18 +118,25 @@ class Art(object):
             self.height = 0.0
             self.area = 0.0
 
-
         #,metadata,colors, is_primary (artists key piece of art)
         # look at cloudinary colors
 
-    def show_image(self):
-        sns.set_style("whitegrid", {'axes.grid': False})
-        plt.imshow(self.image)
-        plt.show()
+    def build_labels(self):
+        self.labels = []
+        col_labs = [('RED-ORANGE', (2, 6)), ('ORANGE',
+                    (6, 10)), ('YELLOW-ORANGE', (10, 14)), ('YELLOW', (14, 18)),
+                    ('YELLOW-GREEN', (18, 21)), ('GREEN', (21, 24)),
+                    ('BLUE-GREEN', (24, 30)), ('BLUE', (30, 34)),
+                    ('BLUE-VIOLET', (34, 38)), ('VIOLET', (38, 42)),
+                    ('RED-VIOLET', (42, 46))]
+        for col, rng in col_labs:
+            if self.primary_hue > rng[0] and self.primary_hue <= rng[1]:
+                self.labels.append(col)
+        if len(self.labels) == 0:
+            self.labels.append('RED')
 
     def show_thumbnail(self):
-        Image.open(self.image).thumbnail((200, 200))
-        return None
+        pass
 
     def get_colors(self, n_colors=5):
         pass
@@ -136,9 +148,10 @@ class Art(object):
 
     def get_hsv(self, plot=False):
         self.hsv_image = color.rgb2hsv(self.image)
-        self.hue_bins = self.create_hist_vector(self.hsv_image, 0, 50, (0.0, 1))
-        self.sat_bins = self.create_hist_vector(self.hsv_image, 1, 50, (0.0, 1))
-        self.val_bins = self.create_hist_vector(self.hsv_image, 2, 50, (0.0, 1))
+        self.hue_bins = self.create_hist_vector(self.hsv_image, 0, 48, (0.0, 1))
+        self.sat_bins = self.create_hist_vector(self.hsv_image, 1, 48, (0.0, 1))
+        self.val_bins = self.create_hist_vector(self.hsv_image, 2, 48, (0.0, 1))
+        self.hue_peaks = signal.find_peaks_cwt(self.hue_bins,np.arange(1,10), min_length=5)
         if plot is True:
             viz.plot_hsv(self.hsv_image)
 
@@ -158,6 +171,7 @@ class Art(object):
             plt.show()
 
     def extract_symmetry(self):
+        # currently this is only for horizontal symmetry
         if len(self.image.shape) == 3:
             height, width, _ = self.image.shape
         else:
@@ -178,6 +192,18 @@ class Art(object):
 
     def extract_movement(self):
         pass
+
+
+    def show_image(self):
+        print self.__str__()
+        sns.set_style("whitegrid", {'axes.grid': False})
+        plt.imshow(self.image)
+        plt.show()
+
+    def plot_bins(self, attr):
+        sns.barplot(range(len(getattr(self, attr))), getattr(self, attr))
+        plt.xlabel(attr)
+        plt.show()
 
     def plot_rgb(self):
         # count rgb values
@@ -220,10 +246,12 @@ class Art(object):
 
     def __str__(self):
         str = """
-              \n\033[1m{}\033[0m is an instance of an Art object \
-              \n\033[1maspect ratio\033[0m = {}\n
+              \n\033[1m--- Art Attributes--- \033[0m\n
+              \n\033[1maspect ratio\033[0m = {}
+              \n\033[1mLabels\033[0m : {}
+              \n\033[1mPrimary Hue\033[0m : {}
               """
-        return str.format(self.short_name, self.aspect_ratio)
+        return str.format(self.aspect_ratio, self.labels, self.primary_hue)
 
 
 if __name__ == '__main__':

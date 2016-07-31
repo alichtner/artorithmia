@@ -129,3 +129,9 @@ Today was spent validating some of the ideas I will be using to cluster, discove
 - create dummy variables for categorical values
 - check how the scaling is working with the features
 - add the final features
+
+# Day 6
+- Added functionality to show artwork images in order of decreasing attribute value
+  - used `getattr(object, attr_name) => value` in the lambda expression to plot this
+- Started building up labels for things that can print out next to an image
+  - somewhat arbitrarily defined the primary colors - I gave the green and blue-green a larger range where they are binned which is in accordance with color theory.

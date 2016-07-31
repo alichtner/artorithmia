@@ -23,13 +23,14 @@ class ClusterArt(object):
         self.artwork = []
         self.artists = []
 
-    def run(self):
+    def run(self, n_clusters=5):
         """
         Run the clustering engine.
         Note: Collection must of loaded first.
         """
+        self.n_clusters = n_clusters
         self.build_features()
-        self.fit(5)
+        self.fit(n_clusters)
         self.predict()
         self.score()
 
@@ -65,7 +66,6 @@ class ClusterArt(object):
         self.n_artworks = len(self.artwork)
         print '{} images added to collection'.format(self.n_artworks)
         print " --- Building feature set --- "
-        self.build_features()
 
     def build_features(self):
         # Create a numpy array of features with each row being an image and
@@ -182,38 +182,18 @@ class ClusterArt(object):
         dist = DistanceMetric.get_metric('euclidean')
         self.art_distances = dist.pairwise(self.features)
 
-    def plot_art_by_color(self, no_pieces=5):
+    def plot_art_by_attribute(self, attr='avg_sat', no_pieces=5):
         """
-        Plot art by decreasing hue red -> blue -> red
-        !!! (it's a wheel rememeber stupid!)
+        Plot art by decreasing attribute value.
+        Example Attributes: 'retail_price', 'size', 'avg_hue', 'avg_sat'
         """
-        self.artwork.sort(key=lambda x: x.primary_hue, reverse=True)
+        print 'hi'
+        self.artwork.sort(key=lambda x: getattr(x, attr), reverse=True)
+        print 'bobo'
         for idx in xrange(0, self.n_artworks, self.n_artworks/no_pieces):
-            print self.artwork[idx].primary_hue
+            print self.artwork[idx]
+            print getattr(self.artwork[idx], attr)
             self.artwork[idx].show_image()
-            plt.plot(self.artwork[idx].hue_bins)
-            plt.show()
-
-    def plot_art_by_saturation(self, no_pieces=5):
-        """
-        Plot art by decreasing saturation
-        """
-        self.artwork.sort(key=lambda x: x.avg_sat, reverse=True)
-        for idx in xrange(0, self.n_artworks, self.n_artworks/no_pieces):
-            print self.artwork[idx].primary_sat
-            self.artwork[idx].show_image()
-            plt.plot(self.artwork[idx].sat_bins)
-            plt.show()
-
-    def plot_art_by_value(self, no_pieces=5):
-        """
-        Plot art by decreasing value
-        """
-        self.artwork.sort(key=lambda x: x.avg_val, reverse=True)
-        for idx in xrange(0, self.n_artworks, self.n_artworks/no_pieces):
-            print self.artwork[idx].primary_val
-            self.artwork[idx].show_image()
-            plt.plot(self.artwork[idx].val_bins)
             plt.show()
 
     def get_exemplar_images(self, plot=False):
