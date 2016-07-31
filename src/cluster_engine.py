@@ -88,6 +88,7 @@ class ClusterArt(object):
         # Meta Features: retail_price, area, width, height
         # need to account for meta features when they aren't there
 
+        features = ['primary_hue']
         color_features = np.array([art.primary_hue, art.avg_hue, art.hue_var,
                                    art.primary_sat, art.avg_sat, art.sat_var,
                                    art.primary_val, art.avg_val, art.val_var])

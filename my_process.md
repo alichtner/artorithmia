@@ -27,6 +27,13 @@ Today was spent validating some of the ideas I will be using to cluster, discove
     - `get_drizl_collection`
   - explored how to calculate symmetry
 
+# Color Temperature
+
+  - The hottest colour is completely red (R=255, G=0, B=0).
+  - The coldest colour is completely blue (R=0, G=0, B=255).
+
+  So the more R you have, the warmer the colour, and the more B you have, the cooler the colour. The G takes you through shades of turquoise, green, and yellow, each being increasingly warmer. When G is zero, you move in the lower left diagonal of the circle when R and B change. As G approaches 255, you cross over the upper right diagonal when R and B change.
+
 ## Day 2
 - use scipy cosine-similarity for use in sklearn's knn
 - `from scipy.spatial.distance import cosine`
@@ -135,3 +142,5 @@ Today was spent validating some of the ideas I will be using to cluster, discove
   - used `getattr(object, attr_name) => value` in the lambda expression to plot this
 - Started building up labels for things that can print out next to an image
   - somewhat arbitrarily defined the primary colors - I gave the green and blue-green a larger range where they are binned which is in accordance with color theory.
+
+- (https://blog.ytotech.com/2015/11/01/findpeaks-in-python/) used the `detect_peaks` function to find peaks

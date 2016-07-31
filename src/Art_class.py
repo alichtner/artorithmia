@@ -8,6 +8,7 @@ from colorthief import ColorThief
 from PIL import Image
 from skimage import measure, color, io
 import seaborn as sns
+from detect_peaks import detect_peaks
 import cv2
 import os
 
@@ -79,8 +80,6 @@ class Art(object):
         cc = m[1, 0] / m[0, 0]
         self.image_central_moments = measure.moments_central(i, cr, cc)
 
-
-
     def build_style_features(self):
         self.extract_blur()
 
@@ -113,7 +112,7 @@ class Art(object):
         # get retail price
         self.retail_price = meta_dict['retail_price']
         if meta_dict['retail_price'] <= 0:
-            self.retail_price = 0.0
+            self.retail_price = 0
         # get sold status
         self.sold = False
         if 'sold' in meta_dict.keys():
@@ -126,12 +125,9 @@ class Art(object):
             self.height = 0.0
             self.area = 0.0
 
-        #,metadata,colors, is_primary (artists key piece of art)
-        # look at cloudinary colors
-
     def build_labels(self):
         self.labels = {}
-        # what is the primary color label
+        # label the primary color of the image
         col_labs = [('RED-ORANGE', (2, 6)), ('ORANGE',
                     (6, 10)), ('YELLOW-ORANGE', (10, 14)), ('YELLOW', (14, 18)),
                     ('YELLOW-GREEN', (18, 21)), ('GREEN', (21, 24)),
@@ -143,6 +139,22 @@ class Art(object):
                 self.labels['color'] = col
         if len(self.labels) == 0:
             self.labels['color'] = 'RED'
+
+        # label the saturation of the picture
+        if max(self.sat_peaks) > 10:
+            self.labels['vibrance'] = 'SATURATED'
+        else:
+            self.labels['vibrance'] = 'MUTED'
+
+        # label the contrast (boldness?)
+        if len(self.val_peaks) == 2 and (self.val_peaks[1] - self.val_peaks[0] > 10):
+            self.labels['contrast'] = 'HIGH-CONTRAST'
+        elif len(self.val_peaks) > 2:
+            self.labels['contrast'] = 'HIGH-DEPTH'
+        else:
+            self.labels['contrast'] = 'LOW-CONTRAST'
+
+
 
         # colorful or not
         # check on the relative height of the peaks and if they are at least a certain distance from eachother
@@ -164,13 +176,25 @@ class Art(object):
         self.blue_bins = self.create_hist_vector(self.image, 2, 255, (0.0, 255))
 
     def get_hsv(self, plot=False):
+        """
+        Build up the HSV features
+        """
         self.hsv_image = color.rgb2hsv(self.image)
         self.hue_bins = self.create_hist_vector(self.hsv_image, 0, 48, (0.0, 1))
-        self.sat_bins = self.create_hist_vector(self.hsv_image, 1, 48, (0.0, 1))
-        self.val_bins = self.create_hist_vector(self.hsv_image, 2, 48, (0.0, 1))
-        self.hue_peaks = signal.find_peaks_cwt(self.hue_bins,np.arange(1,10), min_length=5)
+        self.sat_bins = self.create_hist_vector(self.hsv_image, 1, 32, (0.0, 1))
+        self.val_bins = self.create_hist_vector(self.hsv_image, 2, 32, (0.0, 1))
+        # get the peaks
+        self.hue_peaks = self.get_peaks(self.hue_bins, 0.5, 5)
+        self.val_peaks = self.get_peaks(self.val_bins, 0.4, 5)
+        self.sat_peaks = self.get_peaks(self.sat_bins, 0.4, 5)
         if plot is True:
             viz.plot_hsv(self.hsv_image)
+
+    def get_peaks(self, bins, min_height=0.4, min_separation=4):
+        """
+        Find peaks in a signal
+        """
+        return detect_peaks(bins, mph=min_height, mpd=min_separation, edge='both')
 
     def create_hist_vector(self, image, channel, bins, rng):
         counts, _ = np.histogram(image[:, :, channel].flatten(), bins, rng)
@@ -262,13 +286,22 @@ class Art(object):
                 plt.show()
 
     def __str__(self):
+        """
+        Formats output for printing information about a work.
+        """
         str = """
               \n\033[1m--- Art Attributes--- \033[0m\n
-              \n\033[1maspect ratio\033[0m = {}
-              \n\033[1mLabels\033[0m : {}
-              \n\033[1mPrimary Hue\033[0m : {}
+              \033[1maspect ratio\033[0m = {}
+              \033[1mLabels\033[0m : {}
+              \033[1mPrimary Hue\033[0m : {}
+              \033[mRetail Price\033[0m : $ {}.00
+              Hue Peaks: {}
+              Val Peaks: {}
+              Sat Peaks: {}
               """
-        return str.format(self.aspect_ratio, self.labels, self.primary_hue)
+        return str.format(self.aspect_ratio, self.labels, self.primary_hue,
+                          self.retail_price, self.hue_peaks, self.val_peaks,
+                          self.sat_peaks)
 
 
 if __name__ == '__main__':
