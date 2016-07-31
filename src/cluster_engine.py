@@ -37,9 +37,9 @@ class ClusterArt(object):
     def load_collection_from_directory(self, images_filepath):
         # add work from directory or work from csv option
         # add functionality to ignore .DS_store file
-        for image in os.listdir(images_filepath):
+        for idx, image in enumerate(os.listdir(images_filepath)):
             if image != '.DS_Store':
-                art = Art()
+                art = Art(item_id=idx)
                 try:
                     art.load_image(images_filepath + image)
                 except ValueError:
@@ -53,14 +53,16 @@ class ClusterArt(object):
         # use the json file from cloudinary to direct how the collection
         # should be built
         drizl = pd.read_json(json_file, orient='records')
+        item_id = 0
         for row in xrange(len(drizl)):
             try:
                 img_name = drizl['results'][row]['metadata']['public_id'].replace('/', '_')
-                art = Art()
+                art = Art(item_id=item_id)
                 art.load_image(img_filepath + img_name + '.jpg',
                                drizl['results'][row])
                 print 'Loading Artwork: ', img_name
                 self.artwork.append(art)
+                item_id += 1
             except Exception:
                 print 'No such file or directory'
         self.n_artworks = len(self.artwork)
@@ -73,9 +75,12 @@ class ClusterArt(object):
         # for each work to be used when scoring the clustering
         # create first feature row to append to
         self.no_features = self.make_feature_row(self.artwork[0]).shape[0]
-        self.artists = [self.artwork[0].artist]  # create first artist
+
+        self.collection_ids = [self.artwork[0].item_id]
+        self.artists = [self.artwork[0].short_name]  # create first artist
         self.features = self.make_feature_row(self.artwork[0]).reshape(1, self.no_features)
         for art in self.artwork[1:len(self.artwork)]:
+            self.collection_ids.append(art.item_id) # item_id to be used by recommender
             self.artists.append(art.artist)  # create list of artists
             row = self.make_feature_row(art).reshape(1, self.no_features)
             self.features = np.concatenate((self.features, row), axis=0)
@@ -88,14 +93,15 @@ class ClusterArt(object):
         # Meta Features: retail_price, area, width, height
         # need to account for meta features when they aren't there
 
-        features = ['primary_hue']
-        color_features = np.array([art.primary_hue, art.avg_hue, art.hue_var,
-                                   art.primary_sat, art.avg_sat, art.sat_var,
-                                   art.primary_val, art.avg_val, art.val_var])
-        comp_features = np.array([art.symmetry, art.bluriness,
-                                  art.aspect_ratio])
-        meta_features = np.array([art.retail_price, art.area, art.width,
-                                  art.height])
+        self.feat_names = ['primary_hue', 'avg_hue', 'hue_var', 'primary_sat',
+                           'avg_sat', 'sat_var', 'primary_val', 'avg_val',
+                           'val_var', 'symmetry', 'bluriness', 'aspect_ratio',
+                           'retail_price', 'area', 'width', 'height']
+        color_features = np.array([getattr(art, self.feat_names[0]), getattr(art, self.feat_names[1]), getattr(art, self.feat_names[2]),
+                                   getattr(art, self.feat_names[3]), getattr(art, self.feat_names[4]), getattr(art, self.feat_names[5]),
+                                   getattr(art, self.feat_names[6]), getattr(art, self.feat_names[7]), getattr(art, self.feat_names[8])])
+        comp_features = np.array([getattr(art, self.feat_names[9]), getattr(art, self.feat_names[10]), getattr(art, self.feat_names[11])])
+        meta_features = np.array([getattr(art, self.feat_names[12]), getattr(art, self.feat_names[13]), getattr(art, self.feat_names[14])])
 
         return np.concatenate((color_features, comp_features, meta_features))
         # np.concatenate((single_values, art.red_bins, art.grn_bins,
@@ -224,7 +230,8 @@ class ClusterArt(object):
                 self.artwork[cluster_list[idx]].show_image()
 
     def plot_kmeans(self, x, y):
-        viz.plot_kmeans(self.features, self.cluster_labels,
+
+        viz.plot_kmeans(self.features, self.feat_names, self.cluster_labels,
                         self.cluster_fit.cluster_centers_, x, y)
 
 

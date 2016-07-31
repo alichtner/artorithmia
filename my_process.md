@@ -144,3 +144,8 @@ Today was spent validating some of the ideas I will be using to cluster, discove
   - somewhat arbitrarily defined the primary colors - I gave the green and blue-green a larger range where they are binned which is in accordance with color theory.
 
 - (https://blog.ytotech.com/2015/11/01/findpeaks-in-python/) used the `detect_peaks` function to find peaks
+### Recommender
+- I ended up building a content_based recommender using graphlab. This takes an item_id (which is just the position in the artwork list) and the features output by the cluster_engine
+- At initiation I should show people images from around the cluster centers to give them the best breadth of what the corpus has to offer. That might help the recommender to converge more quickly at a reasonable level of success.
+- The recommender is currently working. You just have to run `gl_recommender.py` using whatever collection library you want. It will load the cluster object and calculate a bunch of things. Afterwards it will cluster images together and put class labels on things.
+- It then asks you for pieces that you like: input them like `0 45 6 2` where the integers are the `item_id`s for the pieces that you like. the script will calculate your most likely likes and then show them to you. 

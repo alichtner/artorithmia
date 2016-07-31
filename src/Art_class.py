@@ -8,7 +8,7 @@ from colorthief import ColorThief
 from PIL import Image
 from skimage import measure, color, io
 import seaborn as sns
-from detect_peaks import detect_peaks
+from detect_peaks import detect_peaks   # found this online
 import cv2
 import os
 
@@ -23,8 +23,10 @@ class Art(object):
     INPUT: None
     OUTPUT: Art (object)
     """
-    def __init__(self):
+    def __init__(self, item_id=None):
+        # item_id is included to index where an Art object is in a collection
         self.filename = None
+        self.item_id = item_id
 
     def load_image(self, filename, meta=None):
         """
@@ -44,6 +46,8 @@ class Art(object):
         self.build_content_features()
         if meta is not None:
             self.build_meta_features(meta)
+        else:
+            print 'No metadata available: Clustering will be done solely on image properties.'
         self.build_labels()
 
     def build_color_features(self):
@@ -153,8 +157,6 @@ class Art(object):
             self.labels['contrast'] = 'HIGH-DEPTH'
         else:
             self.labels['contrast'] = 'LOW-CONTRAST'
-
-
 
         # colorful or not
         # check on the relative height of the peaks and if they are at least a certain distance from eachother
@@ -291,7 +293,8 @@ class Art(object):
         """
         str = """
               \n\033[1m--- Art Attributes--- \033[0m\n
-              \033[1maspect ratio\033[0m = {}
+              \n\033[1mTitle: \033[0m {}
+              \n\033[1maspect ratio\033[0m = {}
               \033[1mLabels\033[0m : {}
               \033[1mPrimary Hue\033[0m : {}
               \033[mRetail Price\033[0m : $ {}.00
@@ -299,7 +302,7 @@ class Art(object):
               Val Peaks: {}
               Sat Peaks: {}
               """
-        return str.format(self.aspect_ratio, self.labels, self.primary_hue,
+        return str.format(self.title, self.aspect_ratio, self.labels, self.primary_hue,
                           self.retail_price, self.hue_peaks, self.val_peaks,
                           self.sat_peaks)
 

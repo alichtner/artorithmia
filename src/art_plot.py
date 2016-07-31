@@ -33,7 +33,7 @@ def plot_hsv(image, bins=12):
     plt.show()
 
 
-def plot_kmeans(features, labels, centers, x, y):
+def plot_kmeans(features, feature_names, labels, centers, x, y):
     d = {0: 'r', 1: 'b', 2: 'g', 3: 'c', 4: 'm'}
     colors = []
     for i in labels:
@@ -49,6 +49,8 @@ def plot_kmeans(features, labels, centers, x, y):
     plt.scatter(centers[:, x],
                 centers[:, y],
                 c=['r', 'b', 'g', 'c', 'm'], s=50)
+    plt.xlabel(feature_names[x])
+    plt.ylabel(feature_names[y])
     plt.show()
 
 
