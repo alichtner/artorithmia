@@ -46,7 +46,7 @@ def download_moma_collection(csv_loc='data/moma_collection.csv',
         sys.stdout.flush()
 
         # grab the URL
-        if df['URL'][i] != 'nan':
+        if type(df['URL'][i]) is str:
             try:
                 url = df['URL'][i]
                 html = requests.get(url)
