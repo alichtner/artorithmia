@@ -48,19 +48,21 @@ def download_moma_collection(csv_loc='data/moma_collection.csv',
         url = df['URL'][i]
         html = requests.get(url)
         soup = BeautifulSoup(html.content, 'lxml')
+        try:
+            # get the image URL, the index value [res] right before the final
+            # split tells the script which resolution image to take 1 ~ 640px width
+            image = soup.findAll('img', attrs={'class':'sov-hero__image-container__image'})[0].get('srcset').split(',')[res].split()[0]
+            image_url = 'http://www.moma.org' + image
+            uopen = urllib2.urlopen(image_url)
+            stream = uopen.read()
 
-        # get the image URL, the index value [res] right before the final
-        # split tells the script which resolution image to take 1 ~ 640px width
-        image = soup.findAll('img', attrs={'class':'sov-hero__image-container__image'})[0].get('srcset').split(',')[res].split()[0]
-        image_url = 'http://www.moma.org' + image
-        uopen = urllib2.urlopen(image_url)
-        stream = uopen.read()
-
-        # save the file
-        fname = location + 'moma_' + str(df['ObjectID'][i]) + '.jpg'
-        file = open(fname, 'w')
-        file.write(stream)
-        file.close()
+            # save the file
+            fname = location + 'moma_' + str(df['ObjectID'][i]) + '.jpg'
+            file = open(fname, 'w')
+            file.write(stream)
+            file.close()
+        except IndexError:
+            print 'No image URL'
     print '\n\n    Download was successful!!!\n'
 
 if __name__ == '__main__':
