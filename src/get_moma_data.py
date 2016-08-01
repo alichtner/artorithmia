@@ -41,7 +41,7 @@ def download_moma_collection(csv_loc='data/moma_collection.csv',
     for i in xrange(len(df)):
         # stdout status update
         time.sleep(0)
-        sys.stdout.write("\r  -- %d %% Artwork Downloaded -- " % (1.*i/10*100))
+        sys.stdout.write("\r  -- %d of %d Works -- %d %% Artwork Downloaded -- " % (i, len(df), 1.*i/len(df)*100))
         sys.stdout.flush()
 
         # grab the URL
