@@ -64,5 +64,5 @@ def download_moma_collection(csv_loc='data/moma_collection.csv',
     print '\n\n    Download was successful!!!\n'
 
 if __name__ == '__main__':
-    # get_moma_collection()
+    get_moma_collection()
     download_moma_collection()
