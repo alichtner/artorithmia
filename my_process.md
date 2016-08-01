@@ -175,6 +175,11 @@ Today was spent validating some of the ideas I will be using to cluster, discove
   `sudo git clone discover-art` onto the efs drive
   `scp -i <path to key> <path to file> ubuntu@.....:~` to send file to my ec2
   - change the bash_profile to have the cloudinary and graphlab key-pairs
+  - to get graphlab on EC2
+    - `conda update pip`
+    - `pip install --upgrade --no-cache-dir https://get.graphlab.com/GraphLab-Create/2.1/your registered email address here/your product key here/GraphLab-Create-License.tar.gz`
+    - `sudo apt-get install libgomp1` need to run this command since this is not installed on ubuntu by default and graphlab needs it
+
 
 ## tmux
 - can use `tmux` to run things on EC2 without worrying about it closing when I shut a terminal or turn my computer off
