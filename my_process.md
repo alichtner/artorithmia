@@ -148,4 +148,39 @@ Today was spent validating some of the ideas I will be using to cluster, discove
 - I ended up building a content_based recommender using graphlab. This takes an item_id (which is just the position in the artwork list) and the features output by the cluster_engine
 - At initiation I should show people images from around the cluster centers to give them the best breadth of what the corpus has to offer. That might help the recommender to converge more quickly at a reasonable level of success.
 - The recommender is currently working. You just have to run `gl_recommender.py` using whatever collection library you want. It will load the cluster object and calculate a bunch of things. Afterwards it will cluster images together and put class labels on things.
-- It then asks you for pieces that you like: input them like `0 45 6 2` where the integers are the `item_id`s for the pieces that you like. the script will calculate your most likely likes and then show them to you. 
+- It then asks you for pieces that you like: input them like `0 45 6 2` where the integers are the `item_id`s for the pieces that you like. the script will calculate your most likely likes and then show them to you.
+- **looks like you can supply weight for what is most important for you when recommending**
+- https://github.com/MonsieurV/py-findpeaks/blob/master/tests/libs/detect_peaks.py source for detect_peaks
+
+# Day 7
+- Fixed multicolor and single color bug so that it used the number of hue peaks rather than the hue variance to tell if something was made using highly divergent colors rather than a fixed section of the color wheel - seems to be a bit better
+
+## Started EC2 and EFS Instances
+- From AWS console, start EFS instance
+- From AWS console, start EC2 instance (used c3.8xlarge with 20GB local storage)
+- Set rules so that I can access from galvanize's two IP addresses and will have to add my home address later so that it can connect from home
+- EFS is elastic file system which scales as you add things
+- set security groups in the EC2 and EFS so that they can talk to each other
+- **ssh into AWS EC2**
+  `ssh -i ~/.ssh/DiscoverArt.pem ubuntu@ec2-52-43-69-244.us-west-2.compute.amazonaws.com`
+
+-**buiding up my datascience stack**
+  `sudo wget <link to anaconda download .sh file>`
+  `bash anaconda....`
+    - follow instructions
+  - open new terminal for changes to be resolved
+  `conda update conda`
+  `conda install scikit-image`
+  `conda update --all`
+  `sudo git clone discover-art` onto the efs drive
+  `scp -i <path to key> <path to file> ubuntu@.....:~` to send file to my ec2
+  - change the bash_profile to have the cloudinary and graphlab key-pairs
+
+## tmux
+- can use `tmux` to run things on EC2 without worrying about it closing when I shut a terminal or turn my computer off
+- tmux also let's me run things on my EC2 in the background and I'm able to do other things in the terminal while it runs
+- **tmux commands**
+  - start tmux `tmux`
+  - run process blah blah blah
+  - go back to terminal `ctrl + b, then d`
+  - to get back in and view output `tmux attach`

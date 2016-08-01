@@ -160,10 +160,10 @@ class Art(object):
 
         # colorful or not
         # check on the relative height of the peaks and if they are at least a certain distance from eachother
-        if self.hue_var > 0.03:
-            self.labels['colorlevel'] = "SINGLE PALETTE"
-        else:
+        if len(self.hue_peaks) > 1:
             self.labels['colorlevel'] = 'MULTICOLOR'
+        else:
+            self.labels['colorlevel'] = 'SINGLE PALETTE'
 
 
     def show_thumbnail(self):

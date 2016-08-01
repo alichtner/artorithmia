@@ -1,4 +1,6 @@
 import numpy as np
+import time
+import sys
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -38,6 +40,9 @@ class ClusterArt(object):
         # add work from directory or work from csv option
         # add functionality to ignore .DS_store file
         for idx, image in enumerate(os.listdir(images_filepath)):
+            time.sleep(0)
+            sys.stdout.write("\r-- %d %% Artwork Loaded -- " % (1.*idx/len(drizl)*100))
+            sys.stdout.flush()
             if image != '.DS_Store':
                 art = Art(item_id=idx)
                 try:
@@ -46,52 +51,65 @@ class ClusterArt(object):
                     print 'Wrong dimensions'
                 self.artwork.append(art)
             self.n_artworks = len(self.artwork)
-        print '{} images added to collection'.format(self.n_artworks)
-        print " --- Building feature set --- "
+        print '-- {} images added to collection'.format(self.n_artworks)
+        print ' -------------------------------- \n '
 
     def load_collection_from_json(self, json_file, img_filepath=None):
         # use the json file from cloudinary to direct how the collection
         # should be built
         drizl = pd.read_json(json_file, orient='records')
         item_id = 0
+        print '\n   Loading collection from JSON file'
+        print '   ------------------------------- '
+        print '   Analyzing and Generating Features for Collection\n'
         for row in xrange(len(drizl)):
+            time.sleep(0)
+            sys.stdout.write("\r-- %d %% Artwork Loaded -- " % (1.*row/len(drizl)*100))
+            sys.stdout.flush()
             try:
                 img_name = drizl['results'][row]['metadata']['public_id'].replace('/', '_')
                 art = Art(item_id=item_id)
                 art.load_image(img_filepath + img_name + '.jpg',
                                drizl['results'][row])
-                print 'Loading Artwork: ', img_name
                 self.artwork.append(art)
                 item_id += 1
             except Exception:
-                print 'No such file or directory'
+                print 'Missing image file: {}'.format(img_name)
         self.n_artworks = len(self.artwork)
-        print '{} images added to collection'.format(self.n_artworks)
-        print " --- Building feature set --- "
+        print ""
+        print '-- {} images added to collection'.format(self.n_artworks)
+        print ' -------------------------------- \n '
 
     def build_features(self):
-        # Create a numpy array of features with each row being an image and
-        # the columns being feature values. Also initialize a list of artists
-        # for each work to be used when scoring the clustering
-        # create first feature row to append to
+        """
+        -- Create list of ids, artists, and features --
+
+        `collection_ids` (list) ids used by the recommender engine
+        `artists` (list) artists used to score clustering
+        `features` (numpy array) features with each row being a piece of art
+        and the columns being feature values.
+        """
+        print "--- Building Art Features --- "
         self.no_features = self.make_feature_row(self.artwork[0]).shape[0]
 
         self.collection_ids = [self.artwork[0].item_id]
         self.artists = [self.artwork[0].short_name]  # create first artist
         self.features = self.make_feature_row(self.artwork[0]).reshape(1, self.no_features)
         for art in self.artwork[1:len(self.artwork)]:
-            self.collection_ids.append(art.item_id) # item_id to be used by recommender
+            self.collection_ids.append(art.item_id)  # item_id to be used by recommender
             self.artists.append(art.artist)  # create list of artists
             row = self.make_feature_row(art).reshape(1, self.no_features)
             self.features = np.concatenate((self.features, row), axis=0)
         #self.fill_sizes()
 
     def make_feature_row(self, art):
-        # The featues to be extracted from each Art object
-        # Color Features: hue, sat, val
-        # Composition Features: symmetry, bluriness, aspect_ratio
-        # Meta Features: retail_price, area, width, height
-        # need to account for meta features when they aren't there
+        """
+        -- Helper function to get the values for each art object --
+
+        Pulls features out by Art() object attribute name
+
+        Change the `feat_names` list to get different features
+        """
 
         self.feat_names = ['primary_hue', 'avg_hue', 'hue_var', 'primary_sat',
                            'avg_sat', 'sat_var', 'primary_val', 'avg_val',
@@ -149,7 +167,7 @@ class ClusterArt(object):
         print '    Model Score: ', self.model_score
         print '    Artist Clustering Score: ', self.artist_cluster_score
         print '    Silhouette Score: ', self.silhouette_avg
-        print '    Features considered ???'
+        print '    Features considered ', self.feat_names
         print '\n  ---------------------------------  \n'
 
     def silhouette(self):
@@ -238,7 +256,6 @@ class ClusterArt(object):
 if __name__ == '__main__':
     f = 'collections/test_small/'
     cluster = ClusterArt()
-    #cluster.load_collection_from_directory(f)
     cluster.load_collection_from_json('data/Artwork.json',
                                       'collections/drizl/all_small/')
     cluster.run()
