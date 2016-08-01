@@ -43,12 +43,11 @@ def download_moma_collection(csv_loc='data/moma_collection.csv',
         time.sleep(0)
         sys.stdout.write("\r  -- %d of %d Works -- %d %% Artwork Downloaded -- " % (i, len(df), 1.*i/len(df)*100))
         sys.stdout.flush()
-
-        # grab the URL
-        url = df['URL'][i]
-        html = requests.get(url)
-        soup = BeautifulSoup(html.content, 'lxml')
         try:
+            # grab the URL
+            url = df['URL'][i]
+            html = requests.get(url)
+            soup = BeautifulSoup(html.content, 'lxml')
             # get the image URL, the index value [res] right before the final
             # split tells the script which resolution image to take 1 ~ 640px width
             image = soup.findAll('img', attrs={'class':'sov-hero__image-container__image'})[0].get('srcset').split(',')[res].split()[0]
