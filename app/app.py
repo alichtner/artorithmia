@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template
 from cluster_engine import ClusterArt
+import pandas as pd
 
 
 app = Flask(__name__)
@@ -8,6 +9,7 @@ app = Flask(__name__)
 # Home page
 @app.route('/')
 def index():
+    #items = [] # list of dictionaries
     items = "../static/img/bird.jpg"
     items = "../static/img/shard/" + c.artwork[0].short_name + '.jpg'
     return render_template('index.html', items = items)
@@ -22,4 +24,5 @@ if __name__ == '__main__':
     c = ClusterArt()
     c.load_collection_from_json('app/data/Artwork.json', 'collections/shard/')
     c.run()
+    #data = pd.read_csv('p')
     app.run(host='0.0.0.0', port=8080, debug=True)

@@ -120,13 +120,14 @@ class Art(object):
         self.title = meta_dict['title']
         self.is_framed = meta_dict['is_framed']
         self.primary_index = meta_dict['primary_index']
-        self.width = meta_dict['width']  # inches
-        self.height = meta_dict['height']    # inches
+        self.width = meta_dict['width'] # inches
+        self.height = meta_dict['height']  # inches
         self.public_id = meta_dict['metadata']['public_id']
         self.depth = meta_dict['depth']
         self.no_of_likes = meta_dict['no_of_likes']
         self.medium = meta_dict['medium']
         self.recommended_matted_border = meta_dict['recommended_matted_border']
+        self.url = meta_dict['image']
         # get retail price
         self.retail_price = meta_dict['retail_price']
         if meta_dict['retail_price'] <= 0:
@@ -136,7 +137,7 @@ class Art(object):
         if 'sold' in meta_dict.keys():
             self.sold = meta_dict['sold']
         # set size characteristics
-        if self.width > 0:
+        if self.width > 0.:
             self.area = 1. * self.width * self.height
         else:
             self.width = 0.0

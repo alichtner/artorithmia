@@ -41,6 +41,7 @@ class ClusterArt(object):
         """
         self.n_clusters = n_clusters
         self.build_features()
+        self.raw_features = self.features
         self.fit(n_clusters)
         self.predict()
         self.score()
@@ -126,14 +127,18 @@ class ClusterArt(object):
         print "--- Building Art Features --- "
         # number of features
         self.no_features = self.make_feature_row(self.artwork[0]).shape[0]
+
         # get first item_id and artist
         self.collection_ids = [self.artwork[0].item_id]
+        self.urls = [self.artwork[0].url]
         self.artists = [self.artwork[0].short_name]
+
         # initialize the first row of features to get the size of the array
         self.features = self.make_feature_row(self.artwork[0]).reshape(1, self.no_features)
         # loop through artworks in the ClusterArt object and pull out feature rows
         for art in self.artwork[1:len(self.artwork)]:
             self.collection_ids.append(art.item_id)  # item_id for recommender
+            self.urls.append(art.url)
             self.artists.append(art.artist)  # create list of artists
             row = self.make_feature_row(art).reshape(1, self.no_features)
             self.features = np.concatenate((self.features, row), axis=0)
@@ -161,12 +166,17 @@ class ClusterArt(object):
         comp_features = np.array([getattr(art, self.feat_names[9]), getattr(art, self.feat_names[10]),
                                   getattr(art, self.feat_names[11])])
         meta_features = np.array([getattr(art, self.feat_names[12]), getattr(art, self.feat_names[13]),
-                                  getattr(art, self.feat_names[14])])
+                                  getattr(art, self.feat_names[14]), getattr(art, self.feat_names[15])])
 
         return np.concatenate((color_features, comp_features, meta_features))
         # np.concatenate((single_values, art.red_bins, art.grn_bins,
         # art.blue_bins, art.hue_bins, art.sat_bins,
         # art.val_bins))
+
+    def pandas_data(self):
+        feature_df = pd.DataFrame(data=self.raw_features, columns=self.feat_names)
+        identity = pd.DataFrame(data={'item_id': self.collection_ids, 'url': self.urls, 'cluster_id': self.cluster_labels})
+        return pd.concat([identity, feature_df], axis=1)
 
     def fill_sizes(self):
         pass

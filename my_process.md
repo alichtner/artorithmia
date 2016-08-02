@@ -188,6 +188,8 @@ Today was spent validating some of the ideas I will be using to cluster, discove
     - `pip install colorutils`
     - `pip install colorthief`
     - `pip install seaborn`
+    - `sudo apt-get install imagemagick`
+    - `sudo apt-get install git`
     - get openCV
       - followed this blog entry http://milq.github.io/install-opencv-ubuntu-debian/
 
