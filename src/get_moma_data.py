@@ -21,11 +21,7 @@ def get_moma_collection():
 
 
 def download_moma_collection(csv_loc='data/moma_collection.csv',
-<<<<<<< HEAD
                              location='collections/moma/',start=596, res=1):
-=======
-                             location='collections/moma/', start=596, res=1):
->>>>>>> b1b2411bf4cc7e8157de5c52d7fe3a53c797abba
     # read in the moma csv and filter it for 2D works of art
 
     df = pd.read_csv(csv_loc)
@@ -75,8 +71,4 @@ def download_moma_collection(csv_loc='data/moma_collection.csv',
 if __name__ == '__main__':
     socks.setdefaultproxy(proxy_type=socks.PROXY_TYPE_SOCKS5, addr="127.0.0.1", port=9050)
     #get_moma_collection()
-<<<<<<< HEAD
-    download_moma_collection(start=56259)
-=======
-    download_moma_collection(start=596)
->>>>>>> b1b2411bf4cc7e8157de5c52d7fe3a53c797abba
+    download_moma_collection(start=57500)

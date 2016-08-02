@@ -11,7 +11,7 @@ c = ClusterArt()
 if sys.argv[1] == 'shard':
     c.load_collection_from_json('data/Artwork.json', 'collections/shard/')
 else:
-    c.load_collection_from_json('data/Artwork.json', 'collections/drizl/all_small/')
+    c.load_collection_from_json('data/Artwork.json', 'collections/drizl/')
 c.run()
 
 if sys.argv[2] == 'rec':
