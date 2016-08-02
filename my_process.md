@@ -179,6 +179,13 @@ Today was spent validating some of the ideas I will be using to cluster, discove
     - `conda update pip`
     - `pip install --upgrade --no-cache-dir https://get.graphlab.com/GraphLab-Create/2.1/your registered email address here/your product key here/GraphLab-Create-License.tar.gz`
     - `sudo apt-get install libgomp1` need to run this command since this is not installed on ubuntu by default and graphlab needs it
+    - `sudo apt-get install python-matplotlib`
+    - `sudo apt-get install libsm6`
+    - `pip install colorutils`
+    - `pip install colorthief`
+    - `pip install seaborn`
+    - get openCV
+      - followed this blog entry http://milq.github.io/install-opencv-ubuntu-debian/
 
 
 ## tmux
@@ -189,3 +196,8 @@ Today was spent validating some of the ideas I will be using to cluster, discove
   - run process blah blah blah
   - go back to terminal `ctrl + b, then d`
   - to get back in and view output `tmux attach`
+
+## tor -- for webscraping
+- I was getting severely throttled back downloading the MOMA database.
+  - https://deshmukhsuraj.wordpress.com/2015/03/08/anonymous-web-scraping-using-python-and-tor/
+  - is a blog post about how to rotate you IP address through a tor network so that you don't get throttled back
