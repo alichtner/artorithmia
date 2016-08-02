@@ -163,9 +163,13 @@ Today was spent validating some of the ideas I will be using to cluster, discove
 - set security groups in the EC2 and EFS so that they can talk to each other
 - **ssh into AWS EC2**
   `ssh -i ~/.ssh/DiscoverArt.pem ubuntu@ec2-52-43-69-244.us-west-2.compute.amazonaws.com`
+  - `sudo apt-get install nfs-common`
+  `sudo mkdir efs`
+  - `sudo mount -t nfs4 -o nfsvers=4.1 us-west-2b.fs-5b8272f2.efs.us-west-2.amazonaws.com:/ efs`
 
 -**buiding up my datascience stack**
   `sudo wget <link to anaconda download .sh file>`
+    - http://repo.continuum.io/archive/Anaconda2-4.1.1-Linux-x86_64.sh
   `bash anaconda....`
     - follow instructions
   - open new terminal for changes to be resolved
@@ -201,3 +205,14 @@ Today was spent validating some of the ideas I will be using to cluster, discove
 - I was getting severely throttled back downloading the MOMA database.
   - https://deshmukhsuraj.wordpress.com/2015/03/08/anonymous-web-scraping-using-python-and-tor/
   - is a blog post about how to rotate you IP address through a tor network so that you don't get throttled back
+
+## Web Gallery of Art
+- this is a database of lots of artworks
+- they provide a file of their archives
+  - http://www.wga.hu/database/download/data_txt.zip
+- wrote a script that finds the 2D works and then downloads them from the internet. These are being pulled into the EFS system using an EC2 instance
+
+# Day 8
+- the majority of art from MOMA (87%) and WGA (99%) were downloaded onto EFS last night
+- switched Art class `extract_blur` to use the skimage laplacian rather than OpenCV since I can't get the OpenCV one to install on amazon
+- edited the average and variance attributes of hue, saturation and color so that it uses the entire pixel range of the image, not just the histogram (which was totally wrong)

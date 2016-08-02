@@ -5,6 +5,10 @@ from src.cluster_engine import ClusterArt
 """
 Quick-Start script to run the clustering (and recommender) on either the shard
 collection or on the full Drizl collection.
+
+Input:  argv[1]: 'shard' or 'all'
+        argv[2]: 'rec' or 'none'
+Output: None
 """
 
 c = ClusterArt()

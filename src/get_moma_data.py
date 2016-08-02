@@ -9,13 +9,15 @@ import socket
 
 def get_moma_collection():
     """
-    Download a CSV of the MOMA collection.
+    Download a CSV of the MOMA collection database.
+
+    Input:  None
+    Output: MOMA collection csv
     """
     url = 'https://media.githubusercontent.com/media/MuseumofModernArt/collection/master/Artworks.csv'
     response = urllib2.urlopen(url)
     html = response.read()
     print ' -- Downloading records for the MOMA collection -- '
-
     with open('data/moma_collection.csv', 'wb') as f:
         f.write(html)
 
@@ -23,7 +25,16 @@ def get_moma_collection():
 def download_moma_collection(csv_loc='data/moma_collection.csv',
                              location='collections/moma/',start=596, res=1):
     # read in the moma csv and filter it for 2D works of art
+     """
+    Download the entire MOMA collection to a local database.
 
+    Input:  csv_loc (str) MOMA collection file with image urls
+            location (str) path to where images should be saved
+            start (int) row index to start downloading from
+            res (int) 0 - 4, different resolution levels (low to high)
+    Output: image files
+    """
+    # read in the moma csv and filter it for 2D works of art
     df = pd.read_csv(csv_loc)
     df = df[df['Department'].isin(['Media and Performance Art',
                                    'Fluxus Collection', 'Film',
@@ -49,11 +60,10 @@ def download_moma_collection(csv_loc='data/moma_collection.csv',
         # grab the URL
         if type(df['URL'][i]) is str:
             try:
+                # navigate to the MOMA page and find the URL for the image
                 url = df['URL'][i]
                 html = requests.get(url)
                 soup = BeautifulSoup(html.content, 'lxml')
-                # get the image URL, the index value [res] right before the final
-                # split tells the script which resolution image to take 1 ~ 640px width
                 image = soup.findAll('img', attrs={'class':'sov-hero__image-container__image'})[0].get('srcset').split(',')[res].split()[0]
                 image_url = 'http://www.moma.org' + image
                 uopen = urllib2.urlopen(image_url)

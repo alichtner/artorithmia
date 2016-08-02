@@ -9,7 +9,8 @@ import sys
 
 def get_wga_database():
     """
-    Download a CSV of the MOMA collection.
+    Download a CSV of the WGA collection.
+    ** currently doesn't work
     """
     url = 'http://www.wga.hu/database/download/data_txt.zip'
     response = urllib2.urlopen(url)
@@ -24,7 +25,8 @@ def get_wga_database():
         f.write(zipfile)
 
 
-def download_wga_collection(csv_loc='data/wga_collection.csv',location='collections/wga/', start=0, res='detail'):
+def download_wga_collection(csv_loc='data/wga_collection.csv',
+                            location='collections/wga/', start=0, res='detail'):
     """
     res = 'detail' or 'art'
     """
@@ -34,13 +36,12 @@ def download_wga_collection(csv_loc='data/wga_collection.csv',location='collecti
 
     # create output message for user
     output = """
-              \n\r -- Downloading MOMA collection --
+              \n\r -- Downloading WGA collection --
               \r  ----------------------------
               \r    Download Location --> {}
               \r  ----------------------------
               \r    Total Works: {}\n"""
     print output.format(location, len(df))
-
 
     for i in xrange(start, len(df)):
         time.sleep(0)
@@ -54,7 +55,8 @@ def download_wga_collection(csv_loc='data/wga_collection.csv',location='collecti
                 soup = BeautifulSoup(html.content, 'lxml')
                 s = url.split('/')[-3:]
                 name = s[1] + '/' + s[2].split('.')[0]
-                image_url = 'http://www.wga.hu/' + res + '/' + s[0] + '/' + name + '.jpg'
+                image_url = ('http://www.wga.hu/' + res + '/' +
+                             s[0] + '/' + name + '.jpg')
                 uopen = urllib2.urlopen(image_url)
                 stream = uopen.read()
                 fname = location + 'wga_' + name.replace('/', '_') + '.jpg'
