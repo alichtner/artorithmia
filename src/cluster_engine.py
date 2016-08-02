@@ -74,7 +74,7 @@ class ClusterArt(object):
         print '-- {} images added to collection'.format(self.n_artworks)
         print ' -------------------------------- \n '
 
-    def load_collection_from_json(self, json_file, img_path=None):
+    def load_collection_from_json(self, catalog, img_path=None, source=None):
         """
         -- WARNING -- CAN TAKE A LONG TIME
 
@@ -89,20 +89,35 @@ class ClusterArt(object):
         """
         # use the json file from cloudinary to direct how the collection
         # should be built
-        drizl = pd.read_json(json_file, orient='records')
+
+        if source == 'drizl':
+            df = pd.read_json(catalog, orient='records')
+        elif source == 'wga':
+            df = pd.read_csv(catalog, delimiter=';')
+
         item_id = 0
+
         print '\n   Loading collection from JSON file'
         print '   ------------------------------- '
         print '   Analyzing and Generating Features for Collection\n'
-        for row in xrange(len(drizl)):
+
+        for row in xrange(len(df)):
             time.sleep(0)
-            sys.stdout.write("\r-- %d %% Artwork Loaded -- " % (1.*row/len(drizl)*100))
+            sys.stdout.write("\r-- %d %% Artwork Loaded -- " % (1.*row/len(df)*100))
             sys.stdout.flush()
             try:
-                img_name = drizl['results'][row]['metadata']['public_id'].replace('/', '_')
+                if source == 'drizl':
+                    img_name = df['results'][row]['metadata']['public_id'].replace('/', '_')
+                else:
+                    s = df['URL'][row].split('/')[-2:]
+                    img_name = 'wga_' + s[0] + '_' + s[1].split('.')[0]
                 art = Art(item_id=item_id)
-                art.load_image(img_path + img_name + '.jpg',
-                               drizl['results'][row])
+
+                if source == 'drizl':
+                    art.load_image(img_path + img_name + '.jpg', df['results'][row], 'drizl')
+                elif source == 'wga':
+                    art.load_image(img_path + img_name + '.jpg', df.ix[row], 'wga')
+
                 self.artwork.append(art)
                 item_id += 1
             except Exception:

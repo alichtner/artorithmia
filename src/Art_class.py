@@ -31,8 +31,34 @@ class Art(object):
         """
         self.filename = None
         self.item_id = item_id
+        self.artist = None
+        self.styles = None
+        self.can_hang_without_frame = None
+        self.surface = None
+        self.published_at = None
+        self.updatedAt = None
+        self.createdAt = None
+        self.style_other = None
+        self.objectId = None
+        self.title = None
+        self.is_framed = None
+        self.primary_index = None
+        self.width = 0.0
+        self.height = 0.0
+        self.public_id = None
+        self.depth = None
+        self.no_of_likes = None
+        self.medium = None
+        self.recommended_matted_border = None
+        self.url = None
+        self.retail_price = 0.0
+        self.sold = False
+        self.area = 0.0
+        self.school = None
+        self.time_start = None
+        self.time_end = None
 
-    def load_image(self, filename, meta=None):
+    def load_image(self, filename, meta=None, meta_source='wga'):
         """
         Load image file and build attributes
 
@@ -42,6 +68,7 @@ class Art(object):
         """
         self.filename = filename
         self.image = misc.imread(filename)
+        self.meta_source = meta_source
         if len(self.image.shape) != 3:
             raise ValueError('Image is not the right dimensions')
         self.short_name = self.filename.split('/')[-1].split('.')[0]
@@ -101,48 +128,59 @@ class Art(object):
     def build_content_features(self):
         pass
 
-    def build_meta_features(self, meta_dict):
+    def build_meta_features(self, meta):
         """
         Takes a json object and parses the values into attributes
 
-        Input:  meta_dict (dict) meta features
+        Input:  meta (dict) meta features
         Output: None
         """
-        self.artist = self.short_name.split('_')[0]
-        self.styles = meta_dict['styles']
-        self.can_hang_without_frame = meta_dict['can_hung_without_frame']
-        self.surface = meta_dict['surface']  # ex. 'canvas'
-        self.published_at = meta_dict['published_at']
-        self.updatedAt = meta_dict['updatedAt']
-        self.createdAt = meta_dict['createdAt']
-        self.style_other = meta_dict['style_other']  # 'floral'
-        self.objectId = meta_dict['objectId']
-        self.title = meta_dict['title']
-        self.is_framed = meta_dict['is_framed']
-        self.primary_index = meta_dict['primary_index']
-        self.width = meta_dict['width'] # inches
-        self.height = meta_dict['height']  # inches
-        self.public_id = meta_dict['metadata']['public_id']
-        self.depth = meta_dict['depth']
-        self.no_of_likes = meta_dict['no_of_likes']
-        self.medium = meta_dict['medium']
-        self.recommended_matted_border = meta_dict['recommended_matted_border']
-        self.url = meta_dict['image']
-        # get retail price
-        self.retail_price = meta_dict['retail_price']
-        if meta_dict['retail_price'] <= 0:
-            self.retail_price = 0
-        # get sold status
-        self.sold = False
-        if 'sold' in meta_dict.keys():
-            self.sold = meta_dict['sold']
-        # set size characteristics
-        if self.width > 0.:
-            self.area = 1. * self.width * self.height
-        else:
-            self.width = 0.0
-            self.height = 0.0
-            self.area = 0.0
+        #import pdb; pdb.set_trace()
+        if self.meta_source == 'drizl':
+            self.artist = self.short_name.split('_')[0]
+            self.styles = meta['styles']
+            self.can_hang_without_frame = meta['can_hung_without_frame']
+            self.surface = meta['surface']  # ex. 'canvas'
+            self.published_at = meta['published_at']
+            self.updatedAt = meta['updatedAt']
+            self.createdAt = meta['createdAt']
+            self.style_other = meta['style_other']  # 'floral'
+            self.objectId = meta['objectId']
+            self.title = meta['title']
+            self.is_framed = meta['is_framed']
+            self.primary_index = meta['primary_index']
+            self.width = meta['width'] # inches
+            self.height = meta['height']  # inches
+            self.public_id = meta['metadata']['public_id']
+            self.depth = meta['depth']
+            self.no_of_likes = meta['no_of_likes']
+            self.medium = meta['medium']
+            self.recommended_matted_border = meta['recommended_matted_border']
+            self.url = meta['image']
+            # get retail price
+            self.retail_price = meta['retail_price']
+            if meta['retail_price'] <= 0:
+                self.retail_price = 0
+            # get sold status
+            self.sold = False
+            if 'sold' in meta.keys():
+                self.sold = meta['sold']
+            # set size characteristics
+            if self.width > 0.:
+                self.area = 1. * self.width * self.height
+            else:
+                self.width = 0.0
+                self.height = 0.0
+                self.area = 0.0
+        if self.meta_source == 'wga':
+            self.artist = meta['AUTHOR']
+            self.title = meta['TITLE']
+            self.url = meta['URL']
+            self.medium = meta['FORM']
+            self.style_other = meta['TYPE']
+            self.school = meta['SCHOOL']
+            self.time_start = int(meta['TIMEFRAME'].split('-')[0])
+            self.time_end = int(meta['TIMEFRAME'].split('-')[1])
 
     def build_labels(self):
         """
