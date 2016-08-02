@@ -6,7 +6,7 @@ from src.cluster_engine import ClusterArt
 Quick-Start script to run the clustering (and recommender) on either the shard
 collection or on the full Drizl collection.
 
-Input:  argv[1]: 'shard' or 'all'
+Input:  argv[1]: 'shard' or <location of images>
         argv[2]: 'rec' or 'none'
 Output: None
 """
@@ -15,7 +15,7 @@ c = ClusterArt()
 if sys.argv[1] == 'shard':
     c.load_collection_from_json('data/Artwork.json', 'collections/shard/')
 else:
-    c.load_collection_from_json('data/Artwork.json', 'collections/drizl/all_small/')
+    c.load_collection_from_json('data/Artwork.json', argv[1])
 c.run()
 
 if sys.argv[2] == 'rec':
