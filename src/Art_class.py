@@ -2,15 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import misc
 from scipy import signal
+import os
 from collections import Counter
 from colorutils import Color
 from colorthief import ColorThief
+import cv2
 from PIL import Image
 from skimage import measure, color, io
 import seaborn as sns
 from detect_peaks import detect_peaks   # found this online
-import cv2
-import os
 
 import art_plot as viz
 
@@ -20,11 +20,17 @@ class Art(object):
     Create an Art object and build a set of attributes and methods
     about the Art itself.
 
-    INPUT: None
-    OUTPUT: Art (object)
+    Input:  None
+    Output: Art (object)
     """
     def __init__(self, item_id=None):
         # item_id is included to index where an Art object is in a collection
+        """
+        Initialize an Art object
+
+        Input:  item_id (int) the index of the artwork in the collection
+        Output: None
+        """
         self.filename = None
         self.item_id = item_id
 
@@ -32,8 +38,9 @@ class Art(object):
         """
         Load image file and build attributes
 
-        INPUT: filename (ex: jpg, png)
-        OUTPUT: None
+        Input:  filename (str) name of the file with extension ['.jpg', '.png']
+                meta (bool) whether or not meta data features should be built
+        Output: None
         """
         self.filename = filename
         self.image = misc.imread(filename)
@@ -47,12 +54,15 @@ class Art(object):
         if meta is not None:
             self.build_meta_features(meta)
         else:
-            print 'No metadata available: Clustering will be done solely on image properties.'
+            print 'No metadata: Clustering done only with image properties.'
         self.build_labels()
 
     def build_color_features(self):
         """
         Extract color related features from each piece of art.
+
+        Input:  None
+        Output: None
         """
         self.get_rgb()
         self.get_hsv()
@@ -62,7 +72,7 @@ class Art(object):
         self.hue_var = self.hue_bins.var()
 
         self.primary_sat = np.argmax(self.sat_bins)
-        self.avg_sat = self.sat_bins.mean() # these are not right
+        self.avg_sat = self.sat_bins.mean()  # these are not right
         self.sat_var = self.sat_bins.var()
 
         self.primary_val = np.argmax(self.val_bins)
@@ -75,6 +85,12 @@ class Art(object):
         self.size_color_blocks_var = None
 
     def build_composition_features(self):
+        """
+        Builds composition related features
+
+        Input:  None
+        Output: None
+        """
         self.aspect_ratio = 1. * self.image.shape[1]/self.image.shape[0]
         self.extract_symmetry()
         i = np.zeros((20, 20), dtype=np.double)
@@ -85,6 +101,12 @@ class Art(object):
         self.image_central_moments = measure.moments_central(i, cr, cc)
 
     def build_style_features(self):
+        """
+        Extract style features (ex. texture, bluriness)
+
+        Input:  None
+        Output: None
+        """
         self.extract_blur()
 
     def build_content_features(self):
@@ -93,6 +115,9 @@ class Art(object):
     def build_meta_features(self, meta_dict):
         """
         Takes a json object and parses the values into attributes
+
+        Input:  meta_dict (dict) meta features
+        Output: None
         """
         self.artist = self.short_name.split('_')[0]
         self.styles = meta_dict['styles']
@@ -130,6 +155,12 @@ class Art(object):
             self.area = 0.0
 
     def build_labels(self):
+        """
+        Apply labels to art objects based on attributes.
+
+        Input:  None
+        Output: None
+        """
         self.labels = {}
         # label the primary color of the image
         col_labs = [('RED-ORANGE', (2, 6)), ('ORANGE',
@@ -151,7 +182,8 @@ class Art(object):
             self.labels['vibrance'] = 'MUTED'
 
         # label the contrast (boldness?)
-        if len(self.val_peaks) == 2 and (self.val_peaks[1] - self.val_peaks[0] > 10):
+        if len(self.val_peaks) == 2 and (self.val_peaks[1] -
+                                         self.val_peaks[0] > 10):
             self.labels['contrast'] = 'HIGH-CONTRAST'
         elif len(self.val_peaks) > 2:
             self.labels['contrast'] = 'HIGH-DEPTH'
@@ -159,12 +191,12 @@ class Art(object):
             self.labels['contrast'] = 'LOW-CONTRAST'
 
         # colorful or not
-        # check on the relative height of the peaks and if they are at least a certain distance from eachother
+        # check on the relative height of the peaks and if they are at least
+        # a certain distance from eachother
         if len(self.hue_peaks) > 1:
             self.labels['colorlevel'] = 'MULTICOLOR'
         else:
             self.labels['colorlevel'] = 'SINGLE PALETTE'
-
 
     def show_thumbnail(self):
         pass
@@ -173,13 +205,23 @@ class Art(object):
         pass
 
     def get_rgb(self):
+        """
+        Bin RGB levels from each image.
+
+        Input:  None
+        Output: None
+        """
         self.red_bins = self.create_hist_vector(self.image, 0, 255, (0.0, 255))
         self.grn_bins = self.create_hist_vector(self.image, 1, 255, (0.0, 255))
         self.blue_bins = self.create_hist_vector(self.image, 2, 255, (0.0, 255))
 
     def get_hsv(self, plot=False):
         """
-        Build up the HSV features
+        Extract HSV values for each image. Creates bins for the HSV vectors.
+        Also finds the peaks in the HSV histograms
+
+        Input:  None
+        Output: None
         """
         self.hsv_image = color.rgb2hsv(self.image)
         self.hue_bins = self.create_hist_vector(self.hsv_image, 0, 48, (0.0, 1))
@@ -194,7 +236,12 @@ class Art(object):
 
     def get_peaks(self, bins, min_height=0.4, min_separation=4):
         """
-        Find peaks in a signal
+        Find peaks in a signal.
+
+        Input:  bins (np.array) histogram of values
+                min_height (float) the min height for a peak to be counted,
+                min_separation (int) min distance peak to peak allowed
+        Output: peak indices (list)
         """
         return detect_peaks(bins, mph=min_height, mpd=min_separation, edge='both')
 
@@ -203,6 +250,11 @@ class Art(object):
         return 1. * counts/counts.max()  # Scale the data
 
     def extract_blur(self, plot=False):
+        """
+        Calculate the variance of the 2nd derivative of the image to get blur.
+
+        Input:  plot (bool) whether or not to show the image after Laplacian
+        Output: None"""
         # do on grayscale
         # check what the mean would give instead of variance
         self.bluriness = cv2.Laplacian(color.rgb2gray(self.image),
@@ -214,6 +266,12 @@ class Art(object):
             plt.show()
 
     def extract_symmetry(self):
+        """
+        Calculate the symmetry of the image by substracting left from right.
+
+        Input:  None
+        Output: None
+        """
         # currently this is only for horizontal symmetry
         if len(self.image.shape) == 3:
             height, width, _ = self.image.shape
@@ -236,19 +294,36 @@ class Art(object):
     def extract_movement(self):
         pass
 
-
     def show_image(self):
+        """
+        Method to plot the image and attributes.
+
+        Input:  None
+        Output: None
+        """
         print self.__str__()
         sns.set_style("whitegrid", {'axes.grid': False})
         plt.imshow(self.image)
         plt.show()
 
     def plot_bins(self, attr):
+        """
+        Plot barplot of binned values.
+
+        Input:  attr (str) the attribute to use when plotting
+        Output: plot object
+        """
         sns.barplot(range(len(getattr(self, attr))), getattr(self, attr))
         plt.xlabel(attr)
         plt.show()
 
     def plot_rgb(self):
+        """
+        Plot the RGB histrograms from an image.
+
+        Input:  None
+        Output: plot object
+        """
         # count rgb values
         r = Counter(self.image[:, :, 0].flatten())
         g = Counter(self.image[:, :, 1].flatten())
@@ -269,6 +344,14 @@ class Art(object):
         plt.show()
 
     def get_palette(self, color_count=6, plot=False, save=False):
+        """
+        Use colorthief to grab the palette from an image.
+
+        Input:  color_count (int) number of colors to extract
+                plot (bool) plot the palette or not
+                save (bool) save the palette to a file
+        Output: plot object or file
+        """
         color_thief = ColorThief(self.filename)
         # get the dominant color
         dominant_color = color_thief.get_color(quality=1)
@@ -290,6 +373,9 @@ class Art(object):
     def __str__(self):
         """
         Formats output for printing information about a work.
+
+        Input:  None
+        Output: output string of attributes
         """
         str = """
               \n\033[1m--- Art Attributes--- \033[0m\n

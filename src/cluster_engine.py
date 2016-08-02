@@ -253,6 +253,7 @@ class ClusterArt(object):
                         self.cluster_fit.cluster_centers_, x, y)
 
 
+
 if __name__ == '__main__':
     f = 'collections/test_small/'
     cluster = ClusterArt()
