@@ -4,7 +4,8 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import time
 import sys
-
+import socks
+import socket
 
 def get_moma_collection():
     """
@@ -20,7 +21,7 @@ def get_moma_collection():
 
 
 def download_moma_collection(csv_loc='data/moma_collection.csv',
-                             location='collections/moma/', res=1):
+                             location='collections/moma/',start=596, res=1):
     # read in the moma csv and filter it for 2D works of art
 
     df = pd.read_csv(csv_loc)
@@ -39,7 +40,7 @@ def download_moma_collection(csv_loc='data/moma_collection.csv',
     print output.format(location, len(df))
 
     # for each row in the dataframe grab the image associated with that row
-    for i in xrange(len(df)):
+    for i in xrange(start, len(df)):
         # stdout status update
         time.sleep(0)
         sys.stdout.write("\r  -- %d of %d Works -- %d %% Artwork Downloaded -- " % (i, len(df), 1.*i/len(df)*100))
@@ -68,5 +69,6 @@ def download_moma_collection(csv_loc='data/moma_collection.csv',
     print '\n\n    Download was successful!!!\n'
 
 if __name__ == '__main__':
+    socks.setdefaultproxy(proxy_type=socks.PROXY_TYPE_SOCKS5, addr="127.0.0.1", port=9050)
     #get_moma_collection()
-    download_moma_collection()
+    download_moma_collection(start=56259)
