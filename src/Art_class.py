@@ -6,9 +6,7 @@ import os
 from collections import Counter
 from colorutils import Color
 from colorthief import ColorThief
-import cv2
-from PIL import Image
-from skimage import measure, color, io
+from skimage import measure, color, io, filters
 import seaborn as sns
 from detect_peaks import detect_peaks   # found this online
 
@@ -68,17 +66,8 @@ class Art(object):
         self.get_hsv()
 
         self.primary_hue = np.argmax(self.hue_bins)
-        self.avg_hue = self.hue_bins.mean()
-        self.hue_var = self.hue_bins.var()
-
         self.primary_sat = np.argmax(self.sat_bins)
-        self.avg_sat = self.sat_bins.mean()  # these are not right
-        self.sat_var = self.sat_bins.var()
-
         self.primary_val = np.argmax(self.val_bins)
-        self.avg_val = self.val_bins.mean()
-        self.val_var = self.val_bins.var()
-
         self.colorfulness = None
         self.no_colors = None
         self.size_color_blocks_avg = None
@@ -224,9 +213,9 @@ class Art(object):
         Output: None
         """
         self.hsv_image = color.rgb2hsv(self.image)
-        self.hue_bins = self.create_hist_vector(self.hsv_image, 0, 48, (0.0, 1))
-        self.sat_bins = self.create_hist_vector(self.hsv_image, 1, 32, (0.0, 1))
-        self.val_bins = self.create_hist_vector(self.hsv_image, 2, 32, (0.0, 1))
+        self.hue_bins, self.avg_hue, self.hue_var = self.create_hist_vector(self.hsv_image, 0, 48, (0.0, 1))
+        self.sat_bins, self.avg_sat, self.sat_var = self.create_hist_vector(self.hsv_image, 1, 32, (0.0, 1))
+        self.val_bins, self.avg_val, self.val_var = self.create_hist_vector(self.hsv_image, 2, 32, (0.0, 1))
         # get the peaks
         self.hue_peaks = self.get_peaks(self.hue_bins, 0.5, 5)
         self.val_peaks = self.get_peaks(self.val_bins, 0.4, 5)
@@ -246,8 +235,9 @@ class Art(object):
         return detect_peaks(bins, mph=min_height, mpd=min_separation, edge='both')
 
     def create_hist_vector(self, image, channel, bins, rng):
-        counts, _ = np.histogram(image[:, :, channel].flatten(), bins, rng)
-        return 1. * counts/counts.max()  # Scale the data
+        channel_values = image[:, :, channel].flatten()
+        counts, _ = np.histogram(channel_values, bins, rng)
+        return (1. * counts/counts.max()), channel_values.mean(), channel_values.var()  # Scale the data
 
     def extract_blur(self, plot=False):
         """
@@ -257,12 +247,13 @@ class Art(object):
         Output: None"""
         # do on grayscale
         # check what the mean would give instead of variance
-        self.bluriness = cv2.Laplacian(color.rgb2gray(self.image),
-                                       cv2.CV_64F).var()
+        self.bluriness = filters.laplace(color.rgb2gray(self.image)).var()
         if plot is True:
-            self.lap = cv2.Laplacian(color.rgb2gray(self.image), cv2.CV_64F)
+            self.lap = filters.laplace(color.rgb2gray(self.image))
             plt.imshow(self.lap)
             plt.title('Laplacian of {}'.format(self.short_name))
+            plt.show()
+            plt.imshow(self.lap)
             plt.show()
 
     def extract_symmetry(self):
@@ -379,16 +370,30 @@ class Art(object):
         """
         str = """
               \n\033[1m--- Art Attributes--- \033[0m\n
-              \n\033[1mTitle: \033[0m {}
-              \n\033[1maspect ratio\033[0m = {}
-              \033[1mLabels\033[0m : {}
-              \033[1mPrimary Hue\033[0m : {}
-              \033[mRetail Price\033[0m : $ {}.00
-              Hue Peaks: {}
-              Val Peaks: {}
-              Sat Peaks: {}
+              \r\033[1mTitle: \033[0m {}
+              \r\033[1maspect ratio\033[0m = {}
+              \r\033[mBlur Level\033[0m = {}
+              \r\033[1mLabels\033[0m : {}
+
+              \r\033[1mPrimary Hue\033[0m : {}
+              \r\033[1mAverage Hue\033[0m : {}
+              \r\033[1mHue Variance\033[0m : {}
+
+              \r\033[1mPrimary Sat\033[0m : {}
+              \r\033[1mAverage Sat\033[0m : {}
+              \r\033[1mSat Variance\033[0m : {}
+
+              \r\033[1mPrimary Val\033[0m : {}
+              \r\033[1mAverage Val\033[0m : {}
+              \r\033[1mVal Variance\033[0m : {}
+
+              \r\033[1mRetail Price\033[0m : $ {}.00
+              \rHue Peaks: {}
+              \rVal Peaks: {}
+              \rSat Peaks: {}
               """
-        return str.format(self.title, self.aspect_ratio, self.labels, self.primary_hue,
+        return str.format(self.title, self.aspect_ratio, self.bluriness, self.labels, self.primary_hue, self.avg_hue, self.hue_var, self.primary_sat, self.avg_sat, self.sat_var,
+                          self.primary_val, self.avg_val, self.val_var,
                           self.retail_price, self.hue_peaks, self.val_peaks,
                           self.sat_peaks)
 

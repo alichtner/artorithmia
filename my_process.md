@@ -211,3 +211,8 @@ Today was spent validating some of the ideas I will be using to cluster, discove
 - they provide a file of their archives
   - http://www.wga.hu/database/download/data_txt.zip
 - wrote a script that finds the 2D works and then downloads them from the internet. These are being pulled into the EFS system using an EC2 instance
+
+# Day 8
+- the majority of art from MOMA (87%) and WGA (99%) were downloaded onto EFS last night
+- switched Art class `extract_blur` to use the skimage laplacian rather than OpenCV since I can't get the OpenCV one to install on amazon
+- edited the average and variance attributes of hue, saturation and color so that it uses the entire pixel range of the image, not just the histogram (which was totally wrong)
