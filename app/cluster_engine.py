@@ -1,11 +1,13 @@
 import numpy as np
+import time
+import sys
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import misc
 from collections import defaultdict
 from collections import Counter
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, DBSCAN
 from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import pairwise_distances_argmin_min
@@ -20,6 +22,12 @@ class ClusterArt(object):
     Build features and cluster a collection of artwork.
     """
     def __init__(self):
+        """
+        Initialize a ClusterArt object.
+
+        Input:  None
+        Output: None
+        """
         self.artwork = []
         self.artists = []
 
@@ -27,79 +35,179 @@ class ClusterArt(object):
         """
         Run the clustering engine.
         Note: Collection must of loaded first.
+
+        Input:  n_clusters (int) number of clusters to fit the features to
+        Output: None
         """
         self.n_clusters = n_clusters
         self.build_features()
-        self.fit(n_clusters)
+        self.raw_features = self.features
+        self.fit('kmeans', n_clusters)
         self.predict()
         self.score()
 
-    def load_collection_from_directory(self, images_filepath):
+    def run_gridsearch(self, max_clusters):
+        self.build_features()
+        self.raw_features = self.features
+        for n in xrange(2, max_clusters):
+            self.fit('kmeans', n)
+            self.predict()
+            self.score()
+
+    def load_collection_from_directory(self, img_path):
+        """
+        -- WARNING -- CAN TAKE A LONG TIME
+
+        Populate the ClusterArt object with an initialized Art object for each
+        image in the specified filepath. This function calculates all of the
+        attributes and values for each image.
+
+        Input:  img_path (str) path to desired images
+        Output: None
+        """
         # add work from directory or work from csv option
         # add functionality to ignore .DS_store file
-        for image in os.listdir(images_filepath):
+        for idx, image in enumerate(os.listdir(img_path)):
+            time.sleep(0)
+            sys.stdout.write("\r-- %d %% Artwork Loaded -- " % (1.*idx/len(drizl)*100))
+            sys.stdout.flush()
             if image != '.DS_Store':
-                art = Art()
+                art = Art(item_id=idx)
                 try:
-                    art.load_image(images_filepath + image)
+                    art.load_image(img_path+ image)
                 except ValueError:
                     print 'Wrong dimensions'
                 self.artwork.append(art)
             self.n_artworks = len(self.artwork)
-        print '{} images added to collection'.format(self.n_artworks)
-        print " --- Building feature set --- "
+        print '-- {} images added to collection'.format(self.n_artworks)
+        print ' -------------------------------- \n '
 
-    def load_collection_from_json(self, json_file, img_filepath=None):
+    def load_collection_from_json(self, catalog, img_path=None, source=None):
+        """
+        -- WARNING -- CAN TAKE A LONG TIME
+
+        Populate the ClusterArt object with an initialized Art object for each
+        row of a json file with references to images. Metadata about artwork is
+        added to each Art object and used during feature building. This
+        function calculates all of the attributes and values for each image.
+
+        Input:  json_file (str) path to json file to be used to parse data
+                img_path (str) path to desired images
+        Output: None
+        """
         # use the json file from cloudinary to direct how the collection
         # should be built
-        drizl = pd.read_json(json_file, orient='records')
-        for row in xrange(len(drizl)):
+
+        if source == 'drizl':
+            df = pd.read_json(catalog, orient='records')
+        elif source == 'wga':
+            df = pd.read_csv(catalog, delimiter=';')
+
+        item_id = 0
+
+        print '\n   Loading collection from JSON file'
+        print '   ------------------------------- '
+        print '   Analyzing and Generating Features for Collection\n'
+
+        for row in xrange(len(df)):
+            time.sleep(0)
+            sys.stdout.write("\r-- %d %% Artwork Loaded -- " % (1.*row/len(df)*100))
+            sys.stdout.flush()
             try:
-                img_name = drizl['results'][row]['metadata']['public_id'].replace('/', '_')
-                art = Art()
-                art.load_image(img_filepath + img_name + '.jpg',
-                               drizl['results'][row])
-                print 'Loading Artwork: ', img_name
+                if source == 'drizl':
+                    img_name = df['results'][row]['metadata']['public_id'].replace('/', '_')
+                else:
+                    s = df['URL'][row].split('/')[-2:]
+                    img_name = 'wga_' + s[0] + '_' + s[1].split('.')[0]
+                art = Art(item_id=item_id)
+
+                if source == 'drizl':
+                    art.load_image(img_path + img_name + '.jpg', df['results'][row], 'drizl')
+                elif source == 'wga':
+                    art.load_image(img_path + img_name + '.jpg', df.ix[row], 'wga')
+
                 self.artwork.append(art)
+                item_id += 1
             except Exception:
-                print 'No such file or directory'
+                print 'Missing image file: {}'.format(img_name)
         self.n_artworks = len(self.artwork)
-        print '{} images added to collection'.format(self.n_artworks)
-        print " --- Building feature set --- "
+        print ""
+        print '-- {} images added to collection'.format(self.n_artworks)
+        print ' -------------------------------- \n '
 
     def build_features(self):
-        # Create a numpy array of features with each row being an image and
-        # the columns being feature values. Also initialize a list of artists
-        # for each work to be used when scoring the clustering
-        # create first feature row to append to
+        """
+        Create list of ids, artists, and an array of artwork features.
+
+        - collection_ids (list) ids used by the recommender engine
+        - artists (list) artists used to score clustering
+        - features (numpy array) features with each row being a piece of art
+                   and the columns being feature values.
+
+        Input:  None
+        Output: None
+        """
+        print "--- Building Art Features --- "
+        # number of features
         self.no_features = self.make_feature_row(self.artwork[0]).shape[0]
-        self.artists = [self.artwork[0].artist]  # create first artist
+
+        # get first item_id and artist
+        self.collection_ids = [self.artwork[0].item_id]
+        self.urls = [self.artwork[0].url]
+        self.artists = [self.artwork[0].short_name]
+
+        # initialize the first row of features to get the size of the array
         self.features = self.make_feature_row(self.artwork[0]).reshape(1, self.no_features)
+        # loop through artworks in the ClusterArt object and pull out feature rows
         for art in self.artwork[1:len(self.artwork)]:
+            self.collection_ids.append(art.item_id)  # item_id for recommender
+            self.urls.append(art.url)
             self.artists.append(art.artist)  # create list of artists
             row = self.make_feature_row(art).reshape(1, self.no_features)
             self.features = np.concatenate((self.features, row), axis=0)
-        #self.fill_sizes()
+        # self.fill_sizes()
 
     def make_feature_row(self, art):
-        # The featues to be extracted from each Art object
-        # Color Features: hue, sat, val
-        # Composition Features: symmetry, bluriness, aspect_ratio
-        # Meta Features: retail_price, area, width, height
-        # need to account for meta features when they aren't there
+        """
+        Helper function to get the values for each art object. Pulls features
+        out by Art() object attribute name. Change the `feat_names` list to
+        get different features.
 
-        color_features = np.array([art.primary_hue, art.avg_hue, art.hue_var,
-                                   art.primary_sat, art.avg_sat, art.sat_var,
-                                   art.primary_val, art.avg_val, art.val_var])
-        comp_features = np.array([art.symmetry, art.bluriness,
-                                  art.aspect_ratio])
-        meta_features = np.array([art.retail_price, art.area, art.width,
-                                  art.height])
+        Input:  art (Art object) the art object to take features from
+        Output: feature row (np.array)
+        """
+
+        self.feat_names = ['primary_hue', 'avg_hue', 'hue_var', 'primary_sat',
+                           'avg_sat', 'sat_var', 'primary_val', 'avg_val',
+                           'val_var', 'symmetry', 'bluriness', 'aspect_ratio',
+                           'retail_price', 'area', 'width', 'height']
+        color_features = np.array([getattr(art, self.feat_names[0]), getattr(art, self.feat_names[1]),
+                                   getattr(art, self.feat_names[2]), getattr(art, self.feat_names[3]),
+                                   getattr(art, self.feat_names[4]), getattr(art, self.feat_names[5]),
+                                   getattr(art, self.feat_names[6]), getattr(art, self.feat_names[7]),
+                                   getattr(art, self.feat_names[8])])
+        comp_features = np.array([getattr(art, self.feat_names[9]), getattr(art, self.feat_names[10]),
+                                  getattr(art, self.feat_names[11])])
+        meta_features = np.array([getattr(art, self.feat_names[12]), getattr(art, self.feat_names[13]),
+                                  getattr(art, self.feat_names[14]), getattr(art, self.feat_names[15])])
 
         return np.concatenate((color_features, comp_features, meta_features))
         # np.concatenate((single_values, art.red_bins, art.grn_bins,
         # art.blue_bins, art.hue_bins, art.sat_bins,
         # art.val_bins))
+
+    def pandas_data(self):
+        """
+        Outputs clean pandas dataframe.
+
+        Input:  None
+        Output: None
+        """
+        df = pd.DataFrame(data=self.raw_features, columns=self.feat_names)
+        identity = pd.DataFrame(data={'item_id': self.collection_ids,
+                                      'url': self.urls,
+                                      'cluster_id': self.cluster_labels})
+        return pd.concat([identity, df], axis=1)
 
     def fill_sizes(self):
         pass
@@ -112,14 +220,21 @@ class ClusterArt(object):
         # #Place column means in the indices. Align the arrays using take
         # self.features[inds]=np.take(col_mean,inds[1])
 
-    def fit(self, n_clusters=5):
+    def fit(self, model, n_clusters=5):
         """
-        Fits clusters to the feature set.
+        Fits clusters to the feature set using a Kmeans model.
+
+        Input:  n_clusters (int) number of clusters to use during clustering
+        Output: None
         """
         self.n_clusters = n_clusters
-        self.model = KMeans(self.n_clusters)
         scaler = StandardScaler()
         self.features = scaler.fit_transform(self.features)
+
+        if model == 'kmeans':
+            self.model = KMeans(self.n_clusters)
+        elif model == 'DBSCAN':
+            self.model = DBSCAN(eps=0.3, min_samples = 3)
         self.cluster_fit = self.model.fit(self.features)
         print ('-- Running clustering on {} piece collection --'
                .format(self.n_artworks))
@@ -127,10 +242,19 @@ class ClusterArt(object):
     def predict(self):
         """
         Predict class labels for each piece of art.
+
+        Input:  None
+        Output: None
         """
         self.cluster_labels = self.model.predict(self.features)
 
     def score(self):
+        """
+        Build and format command line output for scoring a clustering.
+
+        Input:  None
+        Output: command line scoring output
+        """
         self.model_score = self.model.score(self.features)
         self.artist_cluster_score = self.score_artist_clusters()
         self.silhouette_avg = self.silhouette()
@@ -142,19 +266,25 @@ class ClusterArt(object):
         print '    Model Score: ', self.model_score
         print '    Artist Clustering Score: ', self.artist_cluster_score
         print '    Silhouette Score: ', self.silhouette_avg
-        print '    Features considered ???'
+        print '    Features considered ', self.feat_names
         print '\n  ---------------------------------  \n'
 
     def silhouette(self):
+        """
+        Calculate the silhouette score for a certain clustering.
+
+        Input:  None
+        Output: silhouette score (None)
+        """
         return silhouette_score(self.features, self.cluster_labels)
 
-    def return_all(self):
-        """
-        Returns features, predicted labels and predicted cluster centers
-        """
-        return self.features, self.cluster_labels, self.cluster_fit.cluster_centers_
-
     def show_opposites(self, feature):
+        """
+        Show images at either range of a particular feature.
+
+        Input:  feature (str) attribute or feature name
+        Output: None
+        """
         self.artwork.sort(key=lambda x: x.feature, reverse=True)
         print self.artwork[0].feature
         self.artwork[0].show_image()
@@ -162,6 +292,13 @@ class ClusterArt(object):
         self.artwork[-1].show_image()
 
     def score_artist_clusters(self):
+        """
+        Builds up artist cluster scores based on how often an artist's work ends up
+        in a single cluster versus many clusters.
+
+        Input:  None
+        Output: average artist cluster score (float)
+        """
         # score artists in clusters
         # if an artists' work is all in one cluster give a score of 1
         # need way to penalize by the number of clusters
@@ -183,23 +320,28 @@ class ClusterArt(object):
         dist = DistanceMetric.get_metric('euclidean')
         self.art_distances = dist.pairwise(self.features)
 
-    def plot_art_by_attribute(self, attr='avg_sat', no_pieces=5):
+    def plot_by_attribute(self, attr='avg_sat', no_pieces=5):
         """
         Plot art by decreasing attribute value.
         Example Attributes: 'retail_price', 'size', 'avg_hue', 'avg_sat'
+
+        Input:  attr (str) attribute to be used to show art by
+                no_pieces (int) number of pieces to show
+        Output: plot objects
         """
-        print 'hi'
         self.artwork.sort(key=lambda x: getattr(x, attr), reverse=True)
-        print 'bobo'
         for idx in xrange(0, self.n_artworks, self.n_artworks/no_pieces):
             print self.artwork[idx]
             print getattr(self.artwork[idx], attr)
             self.artwork[idx].show_image()
             plt.show()
 
-    def get_exemplar_images(self, plot=False):
+    def exemplar_images(self, plot=False):
         """
-        Find images closest to cluster centers
+        Find images closest to cluster centers.
+
+        Input:  plot (bool) show the images
+        Output: plot objects
         """
         self.exemplar_images, _ = pairwise_distances_argmin_min(
                                 self.cluster_fit.cluster_centers_,
@@ -212,8 +354,9 @@ class ClusterArt(object):
         """
         Return n_images from a cluster
 
-        INPUT: n_images (images to return), cluster (cluster label)
-        OUTPUT: images from cluster
+        Input:  cluster (int) cluster label to take similar artwork from
+                n_images (int) number of images to return from the cluster
+        Output: images from cluster
         """
         for cluster in xrange(self.n_clusters):
             # maybe shuffle the artwork here
@@ -223,14 +366,20 @@ class ClusterArt(object):
                 self.artwork[cluster_list[idx]].show_image()
 
     def plot_kmeans(self, x, y):
-        viz.plot_kmeans(self.features, self.cluster_labels,
+        """
+        Plot the kmeans scatterplot of the Art objects by certain features (x, y).
+        Cluster centers are plotted on the graph as well.
+
+        Input:  x (int) index of feature column for independent variable
+        Output: y (int) index of feature column for dependent variable
+        """
+        viz.plot_kmeans(self.features, self.feat_names, self.cluster_labels,
                         self.cluster_fit.cluster_centers_, x, y)
 
 
 if __name__ == '__main__':
     f = 'collections/test_small/'
     cluster = ClusterArt()
-    #cluster.load_collection_from_directory(f)
     cluster.load_collection_from_json('data/Artwork.json',
                                       'collections/drizl/all_small/')
     cluster.run()

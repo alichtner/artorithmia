@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from scipy import misc
 from collections import defaultdict
 from collections import Counter
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, DBSCAN
 from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import pairwise_distances_argmin_min
@@ -42,9 +42,17 @@ class ClusterArt(object):
         self.n_clusters = n_clusters
         self.build_features()
         self.raw_features = self.features
-        self.fit(n_clusters)
+        self.fit('kmeans', n_clusters)
         self.predict()
         self.score()
+
+    def run_gridsearch(self, max_clusters):
+        self.build_features()
+        self.raw_features = self.features
+        for n in xrange(2, max_clusters):
+            self.fit('kmeans', n)
+            self.predict()
+            self.score()
 
     def load_collection_from_directory(self, img_path):
         """
@@ -189,9 +197,17 @@ class ClusterArt(object):
         # art.val_bins))
 
     def pandas_data(self):
-        feature_df = pd.DataFrame(data=self.raw_features, columns=self.feat_names)
-        identity = pd.DataFrame(data={'item_id': self.collection_ids, 'url': self.urls, 'cluster_id': self.cluster_labels})
-        return pd.concat([identity, feature_df], axis=1)
+        """
+        Outputs clean pandas dataframe.
+
+        Input:  None
+        Output: None
+        """
+        df = pd.DataFrame(data=self.raw_features, columns=self.feat_names)
+        identity = pd.DataFrame(data={'item_id': self.collection_ids,
+                                      'url': self.urls,
+                                      'cluster_id': self.cluster_labels})
+        return pd.concat([identity, df], axis=1)
 
     def fill_sizes(self):
         pass
@@ -204,7 +220,7 @@ class ClusterArt(object):
         # #Place column means in the indices. Align the arrays using take
         # self.features[inds]=np.take(col_mean,inds[1])
 
-    def fit(self, n_clusters=5):
+    def fit(self, model, n_clusters=5):
         """
         Fits clusters to the feature set using a Kmeans model.
 
@@ -212,9 +228,13 @@ class ClusterArt(object):
         Output: None
         """
         self.n_clusters = n_clusters
-        self.model = KMeans(self.n_clusters)
         scaler = StandardScaler()
         self.features = scaler.fit_transform(self.features)
+
+        if model == 'kmeans':
+            self.model = KMeans(self.n_clusters)
+        elif model == 'DBSCAN':
+            self.model = DBSCAN(eps=0.3, min_samples = 3)
         self.cluster_fit = self.model.fit(self.features)
         print ('-- Running clustering on {} piece collection --'
                .format(self.n_artworks))
@@ -258,15 +278,6 @@ class ClusterArt(object):
         """
         return silhouette_score(self.features, self.cluster_labels)
 
-    def return_all(self):
-        """
-        Returns features, predicted labels and predicted cluster centers
-
-        Input:  None
-        Output: None
-        """
-        return self.features, self.cluster_labels, self.cluster_fit.cluster_centers_
-
     def show_opposites(self, feature):
         """
         Show images at either range of a particular feature.
@@ -309,7 +320,7 @@ class ClusterArt(object):
         dist = DistanceMetric.get_metric('euclidean')
         self.art_distances = dist.pairwise(self.features)
 
-    def plot_art_by_attribute(self, attr='avg_sat', no_pieces=5):
+    def plot_by_attribute(self, attr='avg_sat', no_pieces=5):
         """
         Plot art by decreasing attribute value.
         Example Attributes: 'retail_price', 'size', 'avg_hue', 'avg_sat'
@@ -318,16 +329,14 @@ class ClusterArt(object):
                 no_pieces (int) number of pieces to show
         Output: plot objects
         """
-        print 'hi'
         self.artwork.sort(key=lambda x: getattr(x, attr), reverse=True)
-        print 'bobo'
         for idx in xrange(0, self.n_artworks, self.n_artworks/no_pieces):
             print self.artwork[idx]
             print getattr(self.artwork[idx], attr)
             self.artwork[idx].show_image()
             plt.show()
 
-    def get_exemplar_images(self, plot=False):
+    def exemplar_images(self, plot=False):
         """
         Find images closest to cluster centers.
 

@@ -89,7 +89,7 @@ class Art(object):
         Input:  None
         Output: None
         """
-        self.get_rgb()
+        #self.get_rgb()
         self.get_hsv()
 
         self.primary_hue = np.argmax(self.hue_bins)
@@ -172,6 +172,7 @@ class Art(object):
                 self.width = 0.0
                 self.height = 0.0
                 self.area = 0.0
+            self.transform_url(width=400, height=300)
         if self.meta_source == 'wga':
             self.artist = meta['AUTHOR']
             self.title = meta['TITLE']
@@ -181,6 +182,11 @@ class Art(object):
             self.school = meta['SCHOOL']
             self.time_start = int(meta['TIMEFRAME'].split('-')[0])
             self.time_end = int(meta['TIMEFRAME'].split('-')[1])
+
+    def transform_url(self, width=400, height=400):
+        url = self.url.split('/')
+        url[6] = 'w_' + str(width)
+        self.url = '/'.join(url)
 
     def build_labels(self):
         """
@@ -410,31 +416,32 @@ class Art(object):
         str = """
               \n\033[1m--- Art Attributes--- \033[0m\n
               \r\033[1mTitle: \033[0m {}
-              \r\033[1maspect ratio\033[0m = {}
-              \r\033[mBlur Level\033[0m = {}
-              \r\033[1mLabels\033[0m : {}
+              \r\033[1maspect ratio:\033[0m {}
+              \r\033[mBlur Level:\033[0m  {}
 
-              \r\033[1mPrimary Hue\033[0m : {}
-              \r\033[1mAverage Hue\033[0m : {}
-              \r\033[1mHue Variance\033[0m : {}
+              \r\033[1mPrimary Hue\033[0m: {}
+              \r\033[1mAverage Hue\033[0m: {}
+              \r\033[1mHue Variance\033[0m: {}
 
-              \r\033[1mPrimary Sat\033[0m : {}
-              \r\033[1mAverage Sat\033[0m : {}
-              \r\033[1mSat Variance\033[0m : {}
+              \r\033[1mPrimary Sat\033[0m: {}
+              \r\033[1mAverage Sat\033[0m: {}
+              \r\033[1mSat Variance\033[0m: {}
 
-              \r\033[1mPrimary Val\033[0m : {}
-              \r\033[1mAverage Val\033[0m : {}
-              \r\033[1mVal Variance\033[0m : {}
+              \r\033[1mPrimary Val\033[0m: {}
+              \r\033[1mAverage Val\033[0m: {}
+              \r\033[1mVal Variance\033[0m: {}
 
               \r\033[1mRetail Price\033[0m : $ {}.00
-              \rHue Peaks: {}
-              \rVal Peaks: {}
-              \rSat Peaks: {}
+              \r\033[1mHue Peaks:\033[0m {}
+              \r\033[1mVal Peaks:\033[0m {}
+              \r\033[1mSat Peaks:\033[0m {}
+
+              \r\033[1mLabels\033[0m : {}
               """
-        return str.format(self.title, self.aspect_ratio, self.bluriness, self.labels, self.primary_hue, self.avg_hue, self.hue_var, self.primary_sat, self.avg_sat, self.sat_var,
+        return str.format(self.title, self.aspect_ratio, self.bluriness, self.primary_hue, self.avg_hue, self.hue_var, self.primary_sat, self.avg_sat, self.sat_var,
                           self.primary_val, self.avg_val, self.val_var,
                           self.retail_price, self.hue_peaks, self.val_peaks,
-                          self.sat_peaks)
+                          self.sat_peaks, self.labels, )
 
 
 if __name__ == '__main__':

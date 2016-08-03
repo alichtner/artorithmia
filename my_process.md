@@ -218,3 +218,11 @@ Today was spent validating some of the ideas I will be using to cluster, discove
 - the majority of art from MOMA (87%) and WGA (99%) were downloaded onto EFS last night
 - switched Art class `extract_blur` to use the skimage laplacian rather than OpenCV since I can't get the OpenCV one to install on amazon
 - edited the average and variance attributes of hue, saturation and color so that it uses the entire pixel range of the image, not just the histogram (which was totally wrong)
+- spent a lot of time today fixing up the cluster_engine so that it can take wga data which is slightly different from the drizl data
+  - this still hasn't been totally sucessful
+### d3
+- built a visualization which will connect up with flask app to give the cluster label and a size. Every time a like is given for an image, the probability of liking the other images can be updated by changing the sizes. This will effectively show the person traversing the corpus and help them to explore what's around.
+  - still need to build the recommender into the model and build up the ability to present the image and metadata when a dot is clicked on.
+
+# Day 9
+- added function to transform the drizl urls to grab smaller sizes right away
