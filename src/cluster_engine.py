@@ -144,6 +144,7 @@ class ClusterArt(object):
         self.collection_ids = [self.artwork[0].item_id]
         self.urls = [self.artwork[0].url]
         self.artists = [self.artwork[0].short_name]
+        self.titles = [self.artwork[0].title]
 
         # initialize the first row of features to get the size of the array
         self.features = self.make_feature_row(self.artwork[0]).reshape(1, self.no_features)
@@ -152,6 +153,7 @@ class ClusterArt(object):
             self.collection_ids.append(art.item_id)  # item_id for recommender
             self.urls.append(art.url)
             self.artists.append(art.artist)  # create list of artists
+            self.titles.append(art.title)
             row = self.make_feature_row(art).reshape(1, self.no_features)
             self.features = np.concatenate((self.features, row), axis=0)
         # self.fill_sizes()
@@ -196,7 +198,8 @@ class ClusterArt(object):
         df = pd.DataFrame(data=self.raw_features, columns=self.feat_names)
         identity = pd.DataFrame(data={'item_id': self.collection_ids,
                                       'url': self.urls,
-                                      'cluster_id': self.cluster_labels})
+                                      'cluster_id': self.cluster_labels,
+                                      'title':self.titles})
         df = pd.concat([identity, df], axis=1)
 
         if save is not None:

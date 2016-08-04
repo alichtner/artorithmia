@@ -220,12 +220,6 @@ class Art(object):
         else:
             self.labels['colorlevel'] = 'SINGLE PALETTE'
 
-    def show_thumbnail(self):
-        pass
-
-    def get_colors(self, n_colors=5):
-        pass
-
     def get_rgb(self):
         """
         Bin RGB levels from each image.
