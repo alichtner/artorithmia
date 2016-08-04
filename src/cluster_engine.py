@@ -187,23 +187,28 @@ class ClusterArt(object):
         # art.blue_bins, art.hue_bins, art.sat_bins,
         # art.val_bins))
 
-    def pandas_data(self, save=None):
+    def pandas_data(self, savepath=None):
         """
-        Outputs clean pandas dataframe.
+        Outputs clean pandas dataframe of both the raw and scaled data.
 
         Input:  save (str) name of dataframe to save
         Output: None
         """
         # add artists, titles
-        df = pd.DataFrame(data=self.raw_features, columns=self.feat_names)
+        raw_df = pd.DataFrame(data=self.raw_features, columns=self.feat_names)
         identity = pd.DataFrame(data={'item_id': self.collection_ids,
                                       'url': self.urls,
                                       'cluster_id': self.cluster_labels,
                                       'title':self.titles})
+        raw_df = pd.concat([identity, raw_df], axis=1)
+
+        # get the scaled data
+        df = pd.DataFrame(data=self.features, columns=self.feat_names)
         df = pd.concat([identity, df], axis=1)
 
-        if save is not None:
-            df.to_csv(save)
+        if savepath is not None:
+            raw_df.to_csv(savepath + 'drizl_raw.csv')
+            df.to_csv(savepath + 'drizl_scaled.csv')
         return df
 
     def fill_sizes(self):

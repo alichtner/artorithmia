@@ -127,11 +127,17 @@
             </div>
             <div class="col-sm-6">
                 <div id="likes">
-                    <button id='like_button' data-art={{items[0].hero_id}}>like</button>
-                    <button id='dislike_button' data-art={{items[0].hero_id}}>dislike</button>
+                  <ul class="list-inline banner-social-buttons">
+                    <li>
+                        <button class='btn btn-default btn-lg' id='like_button' data-art={{items[0].hero_id}}>like</button>
+                    </li>
+                    <li>
+                        <button class='btn btn-default btn-lg' id='dislike_button' data-art={{items[0].hero_id}}>dislike</button>
+                    </li>
+                  </ul>
                 </div>
                 <div id="art">
-                <img id='recommender_image' src="{{items[0].hero}}">
+                <img style="margin: 20px 50px" id='recommender_image' src="{{items[0].hero}}">
                 <h3><span id="art-title">{{items[0].hero_title}}</span></h3>
                 <p>Color Family</p>
                 <p>Retail Price</p>
