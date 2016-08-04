@@ -276,6 +276,7 @@ class Art(object):
         # check what the mean would give instead of variance
         self.bluriness = filters.laplace(color.rgb2gray(self.image)).var()
         if plot is True:
+            sns.set_style("whitegrid", {'axes.grid': False})
             self.lap = filters.laplace(color.rgb2gray(self.image))
             plt.imshow(self.lap)
             plt.title('Laplacian of {}'.format(self.short_name))

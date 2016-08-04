@@ -18,6 +18,7 @@ def index():
 def likes(id):
     session['likes'].append(id)
     print session['likes']
+    print recommend(json=True)
     return recommend(json=True)
 
 @app.route('/dislikes/<int:id>')
@@ -37,16 +38,21 @@ def recommend(json=True):
         print 'here i am'
 
     data = [{"id_": art.item_id, "art_title": art.title, "url": art.url,
-             "radius": pred_radius[i], "cluster": art.cluster_id}
+             "radius": pred_radius[i], "cluster": art.cluster_id,
+             "retail_price": art.retail_price, "medium": art.retail_price}
             for i, art in df.iterrows()]
 
 
     hero_id = np.random.choice(session['art'])
     hero = data[hero_id]['url']
     hero_title = data[hero_id]['art_title']
-    print data[0]
+    hero_retail_price = data[hero_id]['retail_price']
+    hero_medium = data[hero_id]['retail_price']
 
-    item = dict(hero=hero, hero_id=hero_id, hero_title=hero_title, collection_size=collection_size, n_clusters=n_clusters, data=data)
+    item = dict(hero=hero, hero_id=hero_id, hero_title=hero_title,
+                hero_retail_price=hero_retail_price, hero_medium=hero_medium,
+                collection_size=collection_size, n_clusters=n_clusters,
+                data=data)
     items.append(item)
     if json:
         return jsonify(items=items)

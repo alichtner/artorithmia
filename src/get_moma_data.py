@@ -25,7 +25,7 @@ def get_moma_collection():
 def download_moma_collection(csv_loc='data/moma_collection.csv',
                              location='collections/moma/',start=596, res=1):
     # read in the moma csv and filter it for 2D works of art
-     """
+    """
     Download the entire MOMA collection to a local database.
 
     Input:  csv_loc (str) MOMA collection file with image urls
