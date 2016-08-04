@@ -239,3 +239,13 @@ Today was spent validating some of the ideas I will be using to cluster, discove
     - load the pickled graphlab recommender model
     - as likes are sent in from `indext.html`, those need to be fed into the recommender
     - the recommender will score each value - use these to update the size of the circles in the clusters
+
+- had a bit of a freakout session this evening, nothing i built seems to be very intelligent at the moment, I'm not super excited by it
+- I have output a csv from the clustering engine which has the title, url, item_id, cluster and features
+- I also managed to save the graphlab recommender and it is now loaded inside the app.py
+
+### To do
+- I need to get the likes to then feed into the recommender and have the recommender update the image with something you might like and update the size of the dots with the ranking
+- add tools used to Build
+- add contact me information
+- start building slides 
