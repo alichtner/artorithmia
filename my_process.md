@@ -226,3 +226,16 @@ Today was spent validating some of the ideas I will be using to cluster, discove
 
 # Day 9
 - added function to transform the drizl urls to grab smaller sizes right away
+
+### javascript
+- spent a lot of time dealing with javascript so that I can make the dots on the page connect up with the images and the metadata
+- the like and dislike buttons are now connected with and `id` element which is appended to a list for the user so that they can get recommendations
+
+### cleanup
+- I really should split my code up so that the building features part is separate from clustering and predictions and everything
+
+  - **How the app should work**
+    - load the data for item_id, image url, cluster, title, etc from a csv
+    - load the pickled graphlab recommender model
+    - as likes are sent in from `indext.html`, those need to be fed into the recommender
+    - the recommender will score each value - use these to update the size of the circles in the clusters

@@ -21,6 +21,8 @@
 
     <!-- Theme CSS -->
     <link href="static/css/grayscale.min.css" rel="stylesheet">
+    <link href="static/css/custom.css" rel="stylesheet">
+
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -130,7 +132,7 @@
                 </div>
                 <div id="art">
                 <img id='recommender_image' src="{{items[0].hero}}">
-                <h3>Title</h3>
+                <h3><span id="art-title">{{items[0].hero_title}}</span></h3>
                 <p>Color Family</p>
                 <p>Retail Price</p>
               </div>
@@ -225,9 +227,11 @@ var clusters = new Array(m);
 var nodes = data.map(function(d) {
   var i = d.cluster,
       r = d.radius * maxRadius + 1,
+      t = d.art_title,
+      p = 'happy',
       id = d.id_,
       u = d.url,
-      d = {"cluster": i, "radius": r, "id_":id, "url": u};
+      d = {"cluster": i, 'Test': p, "radius": r, "id_":id, "url": u, "art_title": t};
   if (!clusters[i] || (r > clusters[i].radius)) clusters[i] = d;
   return d;
 });
@@ -250,6 +254,7 @@ var circle = svg.selectAll("circle")
     .attr("r", function(d) { return d.radius; })
     .attr("id_", function(d) {return d.id_; })
     .attr("url", function(d) {return d.url; })
+    .attr("art_title", function(d) {return d.art_title; })
     .style("fill", function(d) { return color(d.cluster); })
     .on("mouseup", pullart)
   //  .on("mousedown", function(d) {d3.select(this).transition().duration(1000).attr('r', d.radius + 3).style("fill", "white").transition().delay(1000).attr("r", d.radius - 3).style("fill", color(d.cluster))})
@@ -259,6 +264,7 @@ function pullart() {
     document.getElementById("recommender_image").src=d3.select(this).attr("url");
     document.getElementById("like_button").setAttribute('data-art', d3.select(this).attr("id_"));
     document.getElementById("dislike_button").setAttribute('data-art', d3.select(this).attr("id_"));
+    document.getElementById("art-title").innerHTML=d3.select(this).attr("art_title");
 }
 
 $("#like_button").click(function() {

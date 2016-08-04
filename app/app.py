@@ -19,14 +19,19 @@ def index():
     n_clusters = c.n_clusters
     labels = c.cluster_labels
     radius = np.random.choice([1,2,3,4,5,6,7,8], size=collection_size)
-    urls = c.urls
 
-    data = [{"id_": i, "url": urls[i].encode("utf-8"), "radius": radius[i], "cluster": labels[i]} for i in range(len(c.artwork))]
+    data = [{"id_": art.item_id, "art_title": art.title.encode("utf-8"),
+             "url": art.url.encode("utf-8"), "radius": radius[i], "cluster":
+             labels[i]}
+             for i, art in enumerate(c.artwork)]
+
     hero_id = np.random.choice(session['art'])
     hero = data[hero_id]['url']
+    hero_title = data[hero_id]['art_title']
+    print data[0]
 
 
-    item = dict(hero=hero, hero_id=hero_id, collection_size=collection_size, n_clusters=n_clusters, data=data)
+    item = dict(hero=hero, hero_id=hero_id, hero_title=hero_title, collection_size=collection_size, n_clusters=n_clusters, data=data)
     items.append(item)
 
     return render_template('index.html', items = items)

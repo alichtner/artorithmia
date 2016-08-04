@@ -58,7 +58,7 @@ class Art(object):
         self.time_start = None
         self.time_end = None
 
-    def load_image(self, filename, meta=None, meta_source='wga'):
+    def load_image(self, filename, meta=None):
         """
         Load image file and build attributes
 
@@ -68,7 +68,6 @@ class Art(object):
         """
         self.filename = filename
         self.image = misc.imread(filename)
-        self.meta_source = meta_source
         if len(self.image.shape) != 3:
             raise ValueError('Image is not the right dimensions')
         self.short_name = self.filename.split('/')[-1].split('.')[0]
@@ -135,53 +134,42 @@ class Art(object):
         Input:  meta (dict) meta features
         Output: None
         """
-        #import pdb; pdb.set_trace()
-        if self.meta_source == 'drizl':
-            self.artist = self.short_name.split('_')[0]
-            self.styles = meta['styles']
-            self.can_hang_without_frame = meta['can_hung_without_frame']
-            self.surface = meta['surface']  # ex. 'canvas'
-            self.published_at = meta['published_at']
-            self.updatedAt = meta['updatedAt']
-            self.createdAt = meta['createdAt']
-            self.style_other = meta['style_other']  # 'floral'
-            self.objectId = meta['objectId']
-            self.title = meta['title']
-            self.is_framed = meta['is_framed']
-            self.primary_index = meta['primary_index']
-            self.width = meta['width'] # inches
-            self.height = meta['height']  # inches
-            self.public_id = meta['metadata']['public_id']
-            self.depth = meta['depth']
-            self.no_of_likes = meta['no_of_likes']
-            self.medium = meta['medium']
-            self.recommended_matted_border = meta['recommended_matted_border']
-            self.url = meta['image']
-            # get retail price
-            self.retail_price = meta['retail_price']
-            if meta['retail_price'] <= 0:
-                self.retail_price = 0
-            # get sold status
-            self.sold = False
-            if 'sold' in meta.keys():
-                self.sold = meta['sold']
-            # set size characteristics
-            if self.width > 0.:
-                self.area = 1. * self.width * self.height
-            else:
-                self.width = 0.0
-                self.height = 0.0
-                self.area = 0.0
-            self.transform_url(width=400, height=300)
-        if self.meta_source == 'wga':
-            self.artist = meta['AUTHOR']
-            self.title = meta['TITLE']
-            self.url = meta['URL']
-            self.medium = meta['FORM']
-            self.style_other = meta['TYPE']
-            self.school = meta['SCHOOL']
-            self.time_start = int(meta['TIMEFRAME'].split('-')[0])
-            self.time_end = int(meta['TIMEFRAME'].split('-')[1])
+        self.artist = self.short_name.split('_')[0]
+        self.styles = meta['styles']
+        self.can_hang_without_frame = meta['can_hung_without_frame']
+        self.surface = meta['surface']  # ex. 'canvas'
+        self.published_at = meta['published_at']
+        self.updatedAt = meta['updatedAt']
+        self.createdAt = meta['createdAt']
+        self.style_other = meta['style_other']  # 'floral'
+        self.objectId = meta['objectId']
+        self.title = str(meta['title']) + ''
+        self.is_framed = meta['is_framed']
+        self.primary_index = meta['primary_index']
+        self.width = meta['width'] # inches
+        self.height = meta['height']  # inches
+        self.public_id = meta['metadata']['public_id']
+        self.depth = meta['depth']
+        self.no_of_likes = meta['no_of_likes']
+        self.medium = meta['medium']
+        self.recommended_matted_border = meta['recommended_matted_border']
+        self.url = meta['image']
+        # get retail price
+        self.retail_price = meta['retail_price']
+        if meta['retail_price'] <= 0:
+            self.retail_price = 0
+        # get sold status
+        self.sold = False
+        if 'sold' in meta.keys():
+            self.sold = meta['sold']
+        # set size characteristics
+        if self.width > 0.:
+            self.area = 1. * self.width * self.height
+        else:
+            self.width = 0.0
+            self.height = 0.0
+            self.area = 0.0
+        self.transform_url(width=400, height=300)
 
     def transform_url(self, width=400, height=400):
         url = self.url.split('/')

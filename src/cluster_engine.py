@@ -82,7 +82,7 @@ class ClusterArt(object):
         print '-- {} images added to collection'.format(self.n_artworks)
         print ' -------------------------------- \n '
 
-    def load_collection_from_json(self, catalog, img_path=None, source=None):
+    def load_collection_from_json(self, catalog, img_path=None):
         """
         -- WARNING -- CAN TAKE A LONG TIME
 
@@ -98,10 +98,7 @@ class ClusterArt(object):
         # use the json file from cloudinary to direct how the collection
         # should be built
 
-        if source == 'drizl':
-            df = pd.read_json(catalog, orient='records')
-        elif source == 'wga':
-            df = pd.read_csv(catalog, delimiter=';')
+        df = pd.read_json(catalog, orient='records')
 
         item_id = 0
 
@@ -114,22 +111,14 @@ class ClusterArt(object):
             sys.stdout.write("\r-- %d %% Artwork Loaded -- " % (1.*row/len(df)*100))
             sys.stdout.flush()
             try:
-                if source == 'drizl':
-                    img_name = df['results'][row]['metadata']['public_id'].replace('/', '_')
-                else:
-                    s = df['URL'][row].split('/')[-2:]
-                    img_name = 'wga_' + s[0] + '_' + s[1].split('.')[0]
+                img_name = df['results'][row]['metadata']['public_id'].replace('/', '_')
                 art = Art(item_id=item_id)
-
-                if source == 'drizl':
-                    art.load_image(img_path + img_name + '.jpg', df['results'][row], 'drizl')
-                elif source == 'wga':
-                    art.load_image(img_path + img_name + '.jpg', df.ix[row], 'wga')
-
+                art.load_image(img_path + img_name + '.jpg', df['results'][row])
                 self.artwork.append(art)
                 item_id += 1
             except Exception:
                 print 'Missing image file: {}'.format(img_name)
+
         self.n_artworks = len(self.artwork)
         print ""
         print '-- {} images added to collection'.format(self.n_artworks)
@@ -196,18 +185,23 @@ class ClusterArt(object):
         # art.blue_bins, art.hue_bins, art.sat_bins,
         # art.val_bins))
 
-    def pandas_data(self):
+    def pandas_data(self, save=None):
         """
         Outputs clean pandas dataframe.
 
-        Input:  None
+        Input:  save (str) name of dataframe to save
         Output: None
         """
+        # add artists, titles
         df = pd.DataFrame(data=self.raw_features, columns=self.feat_names)
         identity = pd.DataFrame(data={'item_id': self.collection_ids,
                                       'url': self.urls,
                                       'cluster_id': self.cluster_labels})
-        return pd.concat([identity, df], axis=1)
+        df = pd.concat([identity, df], axis=1)
+
+        if save is not None:
+            df.to_csv(save)
+        return df
 
     def fill_sizes(self):
         pass
