@@ -146,7 +146,7 @@
                       </ul>
                     </div>
                     <div id="art">
-                    <img style="margin: 20px 50px" height='380px' id='recommender_image' src="{{items[0].hero}}"></img>
+                    <img style="margin: 20px 50px" id='recommender_image' src="{{items[0].hero}}"></img>
                     <h3><span id="art-title">{{items[0].hero_title}}</span></h3>
                     <table align='center'>
                         <tr>
@@ -284,7 +284,7 @@ var width = document.getElementById("d3_ex").clientWidth,
     height = 600
     padding = 2.0, // separation between same-color circles
     clusterPadding = 6, // separation between different-color circles
-    maxRadius = 1;
+    maxRadius = 5;
 
 
 var n = {{items[0].collection_size}}, // total number of circles
@@ -321,7 +321,7 @@ var svg = d3.select("#d3_ex").append("svg")
         .nodes(nodes)
         .size([width, height])
         .gravity(0)
-        .charge(0)
+        .charge(1)
         .on("tick", tick)
         .start();
 
@@ -386,7 +386,7 @@ function updateData(json) {
       circles
           .transition()
               .duration(500)
-              .attr('r', function(d, i) {return data[i].radius})
+              .attr('r', function(d, i) {return data[i].radius * maxRadius})
           .call(force.nodes);
 }
 

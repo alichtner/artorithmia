@@ -31,13 +31,16 @@ def recommend(json=True):
     collection_size = len(df)
     n_clusters = 5
     if len(session['likes']) == 0:
-        pred_radius = np.random.choice([4,5,6], size=len(df))
+        pred_radius = np.random.choice([1], size=len(df))
     else:
-        results = rec.recommend_from_interactions(session['likes'], k=len(df))
-        print results['score']
+        old_preds = np.random.choice([1], size = len(df))
+        results = rec.recommend_from_interactions(session['likes'], k=len(df)).sort('item_id', ascending=True)['score']
+        # need to append to the original weights to make sure that I always have sizes for the dots
+        print results
         print 'length of df', len(df)
-        print 'length predictions', len(results['score'])
-        pred_radius = results['score']
+        print 'length predictions', len(results)
+        pred_radius = list(results)
+        pred_radius.append(1)
         print 'here i am'
 
 # build up the dictionary for each circle to represent the artwork
