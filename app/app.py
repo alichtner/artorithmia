@@ -31,9 +31,13 @@ def recommend(json=True):
     collection_size = len(df)
     n_clusters = 5
     if len(session['likes']) == 0:
-        pred_radius = np.random.choice([4,5], size=len(df))
+        pred_radius = np.random.choice([4,5,6], size=len(df))
     else:
-        pred_radius = np.random.choice([10,12], size=len(df))
+        results = rec.recommend_from_interactions(session['likes'], k=len(df))
+        print results['score']
+        print 'length of df', len(df)
+        print 'length predictions', len(results['score'])
+        pred_radius = results['score']
         print 'here i am'
 
 # build up the dictionary for each circle to represent the artwork

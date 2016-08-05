@@ -122,7 +122,7 @@
     <!-- Science Section -->
     <section id="science" class="container content-section text-center">
         <div class="row">
-                <h2>About DiscoverArt</h2>
+                <h2>Feature Extraction</h2>
                 <img src="static/img/art_features.png" align="center"></img>
         </div>
     </section>
@@ -131,7 +131,7 @@
     <section id="clusters" class="container content-section text-center">
         <div class="row">
               <div class="col-sm-6">
-                  <h3>Explore and Discover</h3>
+                  <h2>Explore and Discover</h2>
                   <div id="d3_ex"></div>
               </div>
               <div class="col-sm-6">
@@ -281,14 +281,16 @@
 <script>
 
 var width = document.getElementById("d3_ex").clientWidth,
-    height = 800
+    height = 600
     padding = 2.0, // separation between same-color circles
     clusterPadding = 6, // separation between different-color circles
     maxRadius = 1;
 
+
 var n = {{items[0].collection_size}}, // total number of circles
-    m = {{items[0].n_clusters}}; // number of distinct clusters
-    data = {{items[0].data|safe}}
+    m = {{items[0].n_clusters}}, // number of distinct clusters
+    data = {{items[0].data|safe}},
+    heroNode = {{items[0].hero_id}};
 
 var color = d3.scale.category10()
     .domain(d3.range(m));
@@ -323,7 +325,7 @@ var svg = d3.select("#d3_ex").append("svg")
         .on("tick", tick)
         .start();
 
-    var circle = svg.selectAll("circle")
+    var circles = svg.selectAll("circle")
         .data(nodes)
       .enter().append("circle")
         .attr("r", function(d) { return d.radius; })
@@ -339,6 +341,9 @@ var svg = d3.select("#d3_ex").append("svg")
         .on("mousedown", function(d) {d3.select(this).transition().duration(1000).attr('r', d.radius + 3).style("fill", "white").transition().delay(1000).attr("r", d.radius - 3).style("fill", color(d.cluster))})
         .call(force.drag);
 
+//    d3.select("[circle.id_=heroNode]").style('fill', 'white');
+
+
 function pullart() {
     document.getElementById("recommender_image").src=d3.select(this).attr("url");
     document.getElementById("like_button").setAttribute('data-art', d3.select(this).attr("id_"));
@@ -353,44 +358,36 @@ function pullart() {
 
 
 function updateData(json) {
-      //var d = dat
-      console.log(json['0']['data'].radius)
-  //     var data = json['0']['data']
-  //     console.log(data)
-  //     var clusters = new Array(m);
-  //     console.log('clusters')
-  //     console.log(data)
-  //     var nodes = data.map(function(d) {
-  //       var i = d.cluster,
-  //           r = d.radius * maxRadius + 1,
-  //           t = d.art_title,
-  //           id = d.id_,
-  //           u = d.url,
-  //           p = d.retail_price,
-  //           m = d.medium,
-  //           w = d.art_width,
-  //           h = d.art_height,
-  //           d = {"cluster": i, "radius": r, "id_":id, "url": u, "art_title": t, "retail_price": p, "medium": m, "art_width": w, "art_height": h};
-  //       if (!clusters[i] || (r > clusters[i].radius)) clusters[i] = d;
-  //       return d;
-  //
-  //     d3.select("#d3_ex").selectAll(".circle").data(nodes)
-  //     .enter().append("circle")
-  //     console.log('Im in the update d3 method')
-  //       .attr("r", function(d) { return d.radius; })
-  //       .attr("id_", function(d) {return d.id_; })
-  //       .attr("url", function(d) {return d.url; })
-  //       .attr("art_title", function(d) {return d.art_title; })
-  //       .attr("retail_price", function(d) {return d.retail_price; })
-  //       .attr("medium", function(d) {return d.medium; })
-  //       .attr("art_width", function(d) {return d.art_width; })
-  //       .attr("art_height", function(d) {return d.art_height; })
-  //       .style("fill", function(d) { return color(d.cluster); })
-  //       .on("mouseup", pullart)
-  //       .on("mousedown", function(d) {d3.select(this).transition().duration(1000).attr('r', d.radius + 3).style("fill", "white").transition().delay(1000).attr("r", d.radius - 3).style("fill", color(d.cluster))})
-  //       .call(force.drag);
-  // });
+      var data = json['0']['data']
 
+      var nodes = data.map(function(d) {
+        var i = d.cluster,
+            r = d.radius + 1,
+            t = d.art_title,
+            id = d.id_,
+            u = d.url,
+            p = d.retail_price,
+            m = d.medium,
+            w = d.art_width,
+            h = d.art_height,
+            d = {"cluster": i, "radius": r, "id_":id, "url": u, "art_title": t, "retail_price": p, "medium": m, "art_width": w, "art_height": h};
+        if (!clusters[i] || (r > clusters[i].radius)) clusters[i] = d;
+        return d;
+      });
+
+      var force = d3.layout.force()
+          .nodes(nodes)
+          .size([width, height])
+          .gravity(0)
+          .charge(0)
+          .on("tick", tick)
+          .start();
+
+      circles
+          .transition()
+              .duration(500)
+              .attr('r', function(d, i) {return data[i].radius})
+          .call(force.nodes);
 }
 
 $("#like_button").click(function() {
@@ -424,7 +421,7 @@ function highlight() {
 };
 
 function tick(e) {
-  circle
+  circles
       .each(cluster(10 * e.alpha * e.alpha))
       .each(collide(.5))
       .attr("cx", function(d) { return d.x; })
