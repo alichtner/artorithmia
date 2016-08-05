@@ -18,7 +18,6 @@ def index():
 def likes(id):
     session['likes'].append(id)
     print session['likes']
-    print recommend(json=True)
     return recommend(json=True)
 
 @app.route('/dislikes/<int:id>')
@@ -37,9 +36,11 @@ def recommend(json=True):
         pred_radius = np.random.choice([10,12], size=len(df))
         print 'here i am'
 
+# build up the dictionary for each circle to represent the artwork
     data = [{"id_": art.item_id, "art_title": art.title, "url": art.url,
              "radius": pred_radius[i], "cluster": art.cluster_id,
-             "retail_price": art.retail_price, "medium": art.retail_price}
+             "retail_price": art.retail_price, "medium": art.medium,
+             "art_width": art.width, "art_height": art.height}
             for i, art in df.iterrows()]
 
 
@@ -47,10 +48,14 @@ def recommend(json=True):
     hero = data[hero_id]['url']
     hero_title = data[hero_id]['art_title']
     hero_retail_price = data[hero_id]['retail_price']
-    hero_medium = data[hero_id]['retail_price']
+    hero_medium = data[hero_id]['medium']
+    hero_width = data[hero_id]['art_width']
+    hero_height = data[hero_id]['art_height']
+
 
     item = dict(hero=hero, hero_id=hero_id, hero_title=hero_title,
                 hero_retail_price=hero_retail_price, hero_medium=hero_medium,
+                hero_width=hero_width, hero_height=hero_height,
                 collection_size=collection_size, n_clusters=n_clusters,
                 data=data)
     items.append(item)
@@ -69,8 +74,11 @@ def recommend(json=True):
 
 
 if __name__ == '__main__':
-    df = pd.read_csv('data/august_3.csv', index_col=0)
-    df['title'] = df['title'].fillna('none')
+    df = pd.read_csv('data/drizl_raw.csv', index_col=0)
+    df['title'] = df['title'].fillna('Untitled')
+    df['medium'] = df['medium'].fillna('Unknown')
+    df['width'] = np.round(df['width'] / 12, 1)
+    df['height'] = np.round(df['height'] / 12, 1)
 
     rec = gl.load_model('app/data/recommender')   # not sure why this needs the 'app'
     app.secret_key = 'Hjadfjlji1909389283'

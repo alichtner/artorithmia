@@ -145,6 +145,7 @@ class ClusterArt(object):
         self.urls = [self.artwork[0].url]
         self.artists = [self.artwork[0].short_name]
         self.titles = [self.artwork[0].title]
+        self.medium = [self.artwork[0].medium[0].encode("utf-8")]
 
         # initialize the first row of features to get the size of the array
         self.features = self.make_feature_row(self.artwork[0]).reshape(1, self.no_features)
@@ -154,6 +155,7 @@ class ClusterArt(object):
             self.urls.append(art.url)
             self.artists.append(art.artist)  # create list of artists
             self.titles.append(art.title)
+            self.medium.append(art.medium[0].encode("utf-8"))
             row = self.make_feature_row(art).reshape(1, self.no_features)
             self.features = np.concatenate((self.features, row), axis=0)
         # self.fill_sizes()
@@ -199,7 +201,8 @@ class ClusterArt(object):
         identity = pd.DataFrame(data={'item_id': self.collection_ids,
                                       'url': self.urls,
                                       'cluster_id': self.cluster_labels,
-                                      'title':self.titles})
+                                      'title':self.titles,
+                                      'medium': self.medium})
         raw_df = pd.concat([identity, raw_df], axis=1)
 
         # get the scaled data

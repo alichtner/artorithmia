@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Grayscale - Start Bootstrap Theme</title>
+    <title>RECtheART</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -68,6 +68,9 @@
                         <a href="#page-top"></a>
                     </li>
                     <li>
+                        <a class="page-scroll" href="#about">Motivation</a>
+                    </li>
+                    <li>
                         <a class="page-scroll" href="#science">The Science</a>
                     </li>
                     <li>
@@ -92,7 +95,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
-                        <h1 class="brand-heading">DiscoverArt</h1>
+                        <h1 class="brand-heading">REC the ART</h1>
                         <h2>Your personal art curator</h2>
                         <a href="#science" class="btn btn-circle page-scroll">
                             <i class="fa fa-angle-double-down animated"></i>
@@ -104,7 +107,7 @@
     </header>
 
     <!-- Science Section -->
-    <section id="science" class="container content-section text-center">
+    <section id="about" class="container content-section text-center">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2">
                 <h2>About DiscoverArt</h2>
@@ -113,59 +116,60 @@
                   and artist know-how DiscoverArt makes the process of
                   finding pieces you like smarter and more fun</p>
             </div>
-        </div>
-        <div class="row">
-          <img src="{{items[0].hero}}" alt="Smiley face" height="300" width="300">
         </div>
     </section>
 
     <!-- Science Section -->
-    <section id="basic_recommend" class="container content-section text-center">
+    <section id="science" class="container content-section text-center">
         <div class="row">
-            <div class="col-lg-8 col-lg-offset-2">
                 <h2>About DiscoverArt</h2>
-                <p>There's a lot of amazing art out there, far too much to
-                  explore on your own. Using the power of machine learning
-                  and artist know-how DiscoverArt makes the process of
-                  finding pieces you like smarter and more fun</p>
-            </div>
-        </div>
-        <div class="row">
-          <img src="{{items[0].hero}}" alt="Smiley face" height="300" width="300">
+                <img src="static/img/art_features.png" align="center"></img>
         </div>
     </section>
 
     <!-- Cluster Section -->
-    <section id="clusters" class="content-section text-center">
+    <section id="clusters" class="container content-section text-center">
         <div class="row">
-            <div class="col-sm-6">
-                <div id="d3_ex"></div>
-            </div>
-            <div class="col-sm-6">
-                <div id="likes">
-                  <ul class="list-inline banner-social-buttons">
-                    <li>
-                        <button class='btn btn-default btn-lg' id='like_button' data-art={{items[0].hero_id}}>like</button>
-                    </li>
-                    <li>
-                        <button class='btn btn-default btn-lg' id='dislike_button' data-art={{items[0].hero_id}}>dislike</button>
-                    </li>
-                  </ul>
-                </div>
-                <div id="art">
-                <img style="margin: 20px 50px" id='recommender_image' src="{{items[0].hero}}">
-                <h3><span id="art-title">{{items[0].hero_title}}</span></h3>
-                <h4>Size: <span id="width">{{items[0].hero_width}}</span>' x <span id="height">{{items[0].hero_height}}</span>'</h4>
-                <h4>Medium: <span id="art-medium-tag">{{items[0].hero_retail_price}}</span></h4>
-                <h4>Retail Price: $<span id="retail-price-tag">{{items[0].hero_retail_price}}</span></h4>
-                <h4>Buy Me</h4>
+              <div class="col-sm-6">
+                  <h3>Explore and Discover</h3>
+                  <div id="d3_ex"></div>
               </div>
+              <div class="col-sm-6">
+                    <div id="likes">
+                        <ul class="list-inline banner-social-buttons">
+                          <li>
+                              <button class='btn btn-default btn-lg' id='like_button' data-art={{items[0].hero_id}}>like</button>
+                            </li>
+                            <li>
+                              <button class='btn btn-default btn-lg' id='dislike_button' data-art={{items[0].hero_id}}>dislike</button>
+                            </li>
+                      </ul>
+                    </div>
+                    <div id="art">
+                    <img style="margin: 20px 50px" height='380px' id='recommender_image' src="{{items[0].hero}}"></img>
+                    <h3><span id="art-title">{{items[0].hero_title}}</span></h3>
+                    <table align='center'>
+                        <tr>
+                          <td class='tb-left'><h4>Size:</h4></th>
+                          <td><h4><span id="art-width-tag">{{items[0].hero_width}}</span>' x <span id="art-height-tag">{{items[0].hero_height}}</span>'</h4></th>
+                        </tr>
+                        <tr>
+                          <td class='tb-left'><h4>Medium:</h4></td>
+                          <td><h4><span id="art-medium-tag">{{items[0].hero_medium}}</span></h4></td>
+                        </tr>
+                        <tr>
+                          <td class='tb-left'><h4>Retail Price:</h4></td>
+                          <td><h4>$<span id="retail-price-tag">{{items[0].hero_retail_price}}</span></h4></td>
+                        </tr>
+                      </table>
+                        <a href='http://drizl.co'><button class='btn btn-default btn-lg' id='like_button' data-art={{items[0].hero_id}}>Buy Me</button></a>
+                    </div>
             </div>
         </div>
     </section>
 
     <!-- Download Section -->
-    <section id="download" class="content-section text-center">
+    <section id="download" class="container content-section text-center">
         <div class="download-section">
             <div class="container">
                 <div class="col-lg-8 col-lg-offset-2">
@@ -299,8 +303,10 @@ var nodes = data.map(function(d) {
       id = d.id_,
       u = d.url,
       p = d.retail_price,
-      m = d.medium
-      d = {"cluster": i, "radius": r, "id_":id, "url": u, "art_title": t, "retail_price": p, "medium": m};
+      m = d.medium,
+      w = d.art_width,
+      h = d.art_height,
+      d = {"cluster": i, "radius": r, "id_":id, "url": u, "art_title": t, "retail_price": p, "medium": m, "art_width": w, "art_height": h};
   if (!clusters[i] || (r > clusters[i].radius)) clusters[i] = d;
   return d;
 });
@@ -309,7 +315,6 @@ var svg = d3.select("#d3_ex").append("svg")
     .attr("width", width)
     .attr("height", height);
 
-function render() {
     var force = d3.layout.force()
         .nodes(nodes)
         .size([width, height])
@@ -327,13 +332,12 @@ function render() {
         .attr("art_title", function(d) {return d.art_title; })
         .attr("retail_price", function(d) {return d.retail_price; })
         .attr("medium", function(d) {return d.medium; })
+        .attr("art_width", function(d) {return d.art_width; })
+        .attr("art_height", function(d) {return d.art_height; })
         .style("fill", function(d) { return color(d.cluster); })
         .on("mouseup", pullart)
-      //  .on("mousedown", function(d) {d3.select(this).transition().duration(1000).attr('r', d.radius + 3).style("fill", "white").transition().delay(1000).attr("r", d.radius - 3).style("fill", color(d.cluster))})
+        .on("mousedown", function(d) {d3.select(this).transition().duration(1000).attr('r', d.radius + 3).style("fill", "white").transition().delay(1000).attr("r", d.radius - 3).style("fill", color(d.cluster))})
         .call(force.drag);
-        return circle;
-  }
-var circle = render()
 
 function pullart() {
     document.getElementById("recommender_image").src=d3.select(this).attr("url");
@@ -342,36 +346,62 @@ function pullart() {
     document.getElementById("art-title").innerHTML=d3.select(this).attr("art_title");
     document.getElementById("retail-price-tag").innerHTML=d3.select(this).attr("retail_price");
     document.getElementById("art-medium-tag").innerHTML=d3.select(this).attr("medium");
+    document.getElementById("art-width-tag").innerHTML=d3.select(this).attr("art_width");
+    document.getElementById("art-height-tag").innerHTML=d3.select(this).attr("art_height");
+
 }
 
 
 function updateData(json) {
-      //var d = data
-      var data = json[0]['data']
+      //var d = dat
+      console.log(json['0']['data'].radius)
+  //     var data = json['0']['data']
+  //     console.log(data)
+  //     var clusters = new Array(m);
+  //     console.log('clusters')
+  //     console.log(data)
+  //     var nodes = data.map(function(d) {
+  //       var i = d.cluster,
+  //           r = d.radius * maxRadius + 1,
+  //           t = d.art_title,
+  //           id = d.id_,
+  //           u = d.url,
+  //           p = d.retail_price,
+  //           m = d.medium,
+  //           w = d.art_width,
+  //           h = d.art_height,
+  //           d = {"cluster": i, "radius": r, "id_":id, "url": u, "art_title": t, "retail_price": p, "medium": m, "art_width": w, "art_height": h};
+  //       if (!clusters[i] || (r > clusters[i].radius)) clusters[i] = d;
+  //       return d;
+  //
+  //     d3.select("#d3_ex").selectAll(".circle").data(nodes)
+  //     .enter().append("circle")
+  //     console.log('Im in the update d3 method')
+  //       .attr("r", function(d) { return d.radius; })
+  //       .attr("id_", function(d) {return d.id_; })
+  //       .attr("url", function(d) {return d.url; })
+  //       .attr("art_title", function(d) {return d.art_title; })
+  //       .attr("retail_price", function(d) {return d.retail_price; })
+  //       .attr("medium", function(d) {return d.medium; })
+  //       .attr("art_width", function(d) {return d.art_width; })
+  //       .attr("art_height", function(d) {return d.art_height; })
+  //       .style("fill", function(d) { return color(d.cluster); })
+  //       .on("mouseup", pullart)
+  //       .on("mousedown", function(d) {d3.select(this).transition().duration(1000).attr('r', d.radius + 3).style("fill", "white").transition().delay(1000).attr("r", d.radius - 3).style("fill", color(d.cluster))})
+  //       .call(force.drag);
+  // });
 
-    //  var svg = d3.select("#d3_ex").transition();
-      var nodes = data.map(function(d) {
-        var i = d.cluster,
-            r = d.radius * maxRadius + 1,
-            t = d.art_title,
-            id = d.id_,
-            u = d.url,
-            d = {"cluster": i, "radius": r, "id_":id, "url": u, "art_title": t};
-        if (!clusters[i] || (r > clusters[i].radius)) clusters[i] = d;
-        console.log(d.radius)
-        return d;
-      });
-
-      var circle = render()
 }
 
 $("#like_button").click(function() {
   var art_id = this.getAttribute("data-art")
+  console.log('hi')
   $.ajax({
       type: "GET",
       url: "/likes/" + art_id,
       success: function(results) {
           updateData(results.items)
+          console.log('success')
       }
   })
 })

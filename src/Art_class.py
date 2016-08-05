@@ -152,6 +152,7 @@ class Art(object):
         self.depth = meta['depth']
         self.no_of_likes = meta['no_of_likes']
         self.medium = meta['medium']
+        self.medium.append('')
         self.recommended_matted_border = meta['recommended_matted_border']
         self.url = meta['image']
         # get retail price
