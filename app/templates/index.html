@@ -116,6 +116,9 @@
                   and artist know-how DiscoverArt makes the process of
                   finding pieces you like smarter and more fun</p>
             </div>
+            <div class="row">
+                    <img src="static/img/pipeline.png" align="center" width='800px'></img>
+            </div>
         </div>
     </section>
 
@@ -403,12 +406,12 @@ $("#like_button").click(function() {
   })
 })
 
-$("#dislike_button").click(function() {
-  var art_id = this.getAttribute("data-art")
-  $.get('/likes/' + art_id, function(data, status) {
-    alert("data: " + data + "\nStatus: " + status)
-  })
-})
+// $("#dislike_button").click(function() {
+//   var art_id = this.getAttribute("data-art")
+//   $.get('/likes/' + art_id, function(data, status) {
+//     alert("data: " + data + "\nStatus: " + status)
+//   })
+// })
 
 function highlight() {
     d3.select(this).transition()

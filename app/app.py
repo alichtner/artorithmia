@@ -31,17 +31,19 @@ def recommend(json=True):
     collection_size = len(df)
     n_clusters = 5
     if len(session['likes']) == 0:
-        pred_radius = np.random.choice([1], size=len(df))
+        df['radius'] = 1
+        pred_radius = df['radius']
     else:
-        old_preds = np.random.choice([1], size = len(df))
-        results = rec.recommend_from_interactions(session['likes'], k=len(df)).sort('item_id', ascending=True)['score']
+        results = rec.recommend_from_interactions(session['likes'], k=len(df)).sort('item_id', ascending=True)
         # need to append to the original weights to make sure that I always have sizes for the dots
-        print results
-        print 'length of df', len(df)
-        print 'length predictions', len(results)
-        pred_radius = list(results)
-        pred_radius.append(1)
-        print 'here i am'
+        rec_df = results['item_id', 'score'].to_dataframe()
+        merged = df.merge(rec_df, how='outer')
+        merged['score'] = merged['score'].fillna(value=0)
+        merged['radius'] = np.where(merged['score'] < merged['score'].mean(), merged['radius'] - .25, merged['radius'] + .5)
+        merged['radius'] = np.where(merged['radius'] < .5, .5, merged['radius'])
+        pred_radius = merged['radius']
+        df['radius'] = pred_radius
+
 
 # build up the dictionary for each circle to represent the artwork
     data = [{"id_": art.item_id, "art_title": art.title, "url": art.url,
@@ -50,7 +52,6 @@ def recommend(json=True):
              "art_width": art.width, "art_height": art.height}
             for i, art in df.iterrows()]
 
-
     hero_id = np.random.choice(session['art'])
     hero = data[hero_id]['url']
     hero_title = data[hero_id]['art_title']
@@ -58,7 +59,6 @@ def recommend(json=True):
     hero_medium = data[hero_id]['medium']
     hero_width = data[hero_id]['art_width']
     hero_height = data[hero_id]['art_height']
-
 
     item = dict(hero=hero, hero_id=hero_id, hero_title=hero_title,
                 hero_retail_price=hero_retail_price, hero_medium=hero_medium,
@@ -70,15 +70,6 @@ def recommend(json=True):
         return jsonify(items=items)
     else:
         return render_template('index.html', items = items)
-
-
-    # if len(session['likes'])  == 0:
-    #     return np.random.choice([4], size=len(df))
-    #
-    # else:
-    #     results = rec.recommend_from_interactions(session['likes'], k=len(df))
-        #return results['score']
-
 
 if __name__ == '__main__':
     df = pd.read_csv('data/drizl_raw.csv', index_col=0)
