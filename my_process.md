@@ -248,4 +248,7 @@ Today was spent validating some of the ideas I will be using to cluster, discove
 - I need to get the likes to then feed into the recommender and have the recommender update the image with something you might like and update the size of the dots with the ranking
 - add tools used to Build
 - add contact me information
-- start building slides 
+- start building slides
+
+### Day 10
+- aws-endpoint: artorithmia.com.s3-website-us-west-2.amazonaws.com

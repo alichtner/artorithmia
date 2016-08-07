@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>RECtheART</title>
+    <title>Artorithmia</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -95,7 +95,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
-                        <h1 class="brand-heading">REC the ART</h1>
+                        <h1 class="brand-heading">Artorithmia</h1>
                         <h2>Your personal art curator</h2>
                         <a href="#science" class="btn btn-circle page-scroll">
                             <i class="fa fa-angle-double-down animated"></i>
@@ -110,7 +110,7 @@
     <section id="about" class="container content-section text-center">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2">
-                <h2>About DiscoverArt</h2>
+                <h2>About Artorithmia</h2>
                 <p>There's a lot of amazing art out there, far too much to
                   explore on your own. Using the power of machine learning
                   and artist know-how DiscoverArt makes the process of
@@ -258,7 +258,7 @@
     <!-- Footer -->
     <footer>
         <div class="container text-center">
-            <p>Copyright &copy; Your Website 2016</p>
+            <p>Copyright &copy; Artorithmia 2016</p>
         </div>
     </footer>
 
@@ -285,7 +285,7 @@
 
 var width = document.getElementById("d3_ex").clientWidth,
     height = 600
-    padding = 2.0, // separation between same-color circles
+    padding = 3, // separation between same-color circles
     clusterPadding = 6, // separation between different-color circles
     maxRadius = 5;
 
@@ -311,7 +311,9 @@ var nodes = data.map(function(d) {
       m = d.medium,
       w = d.art_width,
       h = d.art_height,
-      d = {"cluster": i, "radius": r, "id_":id, "url": u, "art_title": t, "retail_price": p, "medium": m, "art_width": w, "art_height": h};
+      d = {"cluster": i, "radius": r, "id_":id, "url": u, "art_title": t, "retail_price": p, "medium": m, "art_width": w, "art_height": h,
+      x: Math.cos(i / m * 2 * Math.PI) * 200 + width / 2 + Math.random(),
+          y: Math.sin(i / m * 2 * Math.PI) * 200 + height / 2 + Math.random()};
   if (!clusters[i] || (r > clusters[i].radius)) clusters[i] = d;
   return d;
 });
@@ -323,15 +325,15 @@ var svg = d3.select("#d3_ex").append("svg")
     var force = d3.layout.force()
         .nodes(nodes)
         .size([width, height])
-        .gravity(0)
-        .charge(1)
+        .gravity(0.02)
+        .charge(0)
         .on("tick", tick)
         .start();
 
     var circles = svg.selectAll("circle")
         .data(nodes)
       .enter().append("circle")
-        .attr("r", function(d) { return d.radius; })
+    //    .attr("r", function(d) { return d.radius; })
         .attr("id_", function(d) {return d.id_; })
         .attr("url", function(d) {return d.url; })
         .attr("art_title", function(d) {return d.art_title; })
@@ -341,13 +343,19 @@ var svg = d3.select("#d3_ex").append("svg")
         .attr("art_height", function(d) {return d.art_height; })
         .style("fill", function(d) { return color(d.cluster); })
         .on("mouseup", pullart)
-        .on("mousedown", function(d) {d3.select(this).transition().duration(1000).attr('r', d.radius + 3).style("fill", "white").transition().delay(1000).attr("r", d.radius - 3).style("fill", color(d.cluster))})
-        .call(force.drag);
+        .on("mousedown", function(d) {d3.select(this).transition().duration(1000).style("fill", "white").transition().delay(1000).style("fill", color(d.cluster))})
+      ;
 
-//    d3.select("[circle.id_=heroNode]").style('fill', 'white');
-
+    circles.transition()
+        .duration(3000)
+        .delay(function(d, i) { return i * 5; })
+        .attrTween("r", function(d) {
+          var i = d3.interpolate(0, d.radius);
+          return function(t) { return d.radius = i(t); };
+        });
 
 function pullart() {
+    // grab and send the artwork image and metadata about the selected node
     document.getElementById("recommender_image").src=d3.select(this).attr("url");
     document.getElementById("like_button").setAttribute('data-art', d3.select(this).attr("id_"));
     document.getElementById("dislike_button").setAttribute('data-art', d3.select(this).attr("id_"));
@@ -356,16 +364,14 @@ function pullart() {
     document.getElementById("art-medium-tag").innerHTML=d3.select(this).attr("medium");
     document.getElementById("art-width-tag").innerHTML=d3.select(this).attr("art_width");
     document.getElementById("art-height-tag").innerHTML=d3.select(this).attr("art_height");
-
 }
-
 
 function updateData(json) {
       var data = json['0']['data']
 
       var nodes = data.map(function(d) {
         var i = d.cluster,
-            r = d.radius + 1,
+            r = d.radius * maxRadius + 1,
             t = d.art_title,
             id = d.id_,
             u = d.url,
@@ -381,17 +387,19 @@ function updateData(json) {
       var force = d3.layout.force()
           .nodes(nodes)
           .size([width, height])
-          .gravity(0)
+          .gravity(0.02)
           .charge(0)
           .on("tick", tick)
           .start();
 
-      circles
-          .transition()
-              .duration(500)
-              .attr('r', function(d, i) {return data[i].radius * maxRadius})
-          .call(force.nodes);
-}
+      circles.transition()
+          .duration(750)
+          .delay(function(d, i) { return i * 5; })
+          .attrTween("r", function(d, i) {
+            var i = d3.interpolate(d.radius, data[i].radius * maxRadius);
+            return function(t) { return d.radius = i(t); };
+          });
+        }
 
 $("#like_button").click(function() {
   var art_id = this.getAttribute("data-art")
@@ -434,21 +442,14 @@ function tick(e) {
 // Move d to be adjacent to the cluster node.
 function cluster(alpha) {
   return function(d) {
-    var cluster = clusters[d.cluster],
-        k = 1;
-
-    // For cluster nodes, apply custom gravity.
-    if (cluster === d) {
-      cluster = {x: width / 2, y: height / 2, radius: -d.radius};
-      k = .1 * Math.sqrt(d.radius);
-    }
-
+    var cluster = clusters[d.cluster];
+    if (cluster === d) return;
     var x = d.x - cluster.x,
         y = d.y - cluster.y,
         l = Math.sqrt(x * x + y * y),
         r = d.radius + cluster.radius;
     if (l != r) {
-      l = (l - r) / l * alpha * k;
+      l = (l - r) / l * alpha;
       d.x -= x *= l;
       d.y -= y *= l;
       cluster.x += x;
@@ -456,6 +457,7 @@ function cluster(alpha) {
     }
   };
 }
+
 
 // Resolves collisions between d and all other circles.
 function collide(alpha) {

@@ -40,6 +40,10 @@ def recommend(json=True):
         merged = df.merge(rec_df, how='outer')
         merged['score'] = merged['score'].fillna(value=0)
         merged['radius'] = np.where(merged['score'] < merged['score'].mean(), merged['radius'] - .25, merged['radius'] + .5)
+        merged['radius'] = np.where(merged['score'] == merged['score'].max(), merged['radius'] + 1, merged['radius'])
+
+
+        # limits how small the nodes can go
         merged['radius'] = np.where(merged['radius'] < .5, .5, merged['radius'])
         pred_radius = merged['radius']
         df['radius'] = pred_radius
