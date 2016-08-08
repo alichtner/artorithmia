@@ -59,11 +59,11 @@ def recommend(json=True, like=True):
         merged['radius'] = np.where(merged['score'] == merged['score'].max(), merged['radius'] + 1, merged['radius'])
 
 
-        # limits how small the nodes can go
+        # set the max and min limits for node size
         merged['radius'] = np.where(merged['radius'] < .5, .5, merged['radius'])
+        merged['radius'] = np.where(merged['radius'] >= 4, 4, merged['radius'])
         pred_radius = merged['radius']
         df['radius'] = pred_radius
-
 
 # build up the dictionary for each circle to represent the artwork
     data = [{"id_": art.item_id, "art_title": art.title, "url": art.url,
