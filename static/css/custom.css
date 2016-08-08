@@ -1,0 +1,24 @@
+#recommender_image {
+  max-height: 400px
+}
+
+#container {
+  padding-top: 0px
+}
+
+th, td {
+    text-align: center
+    padding: 2px
+    border-spacing: 0px 5px;
+}
+
+.tb-left {
+  text-align: center
+  color: #42DCA3;
+}
+
+img.recommender_image{
+    width:100%;
+    max-width:450px;
+    max-height: 400px;
+}
