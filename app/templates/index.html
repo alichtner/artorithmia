@@ -56,7 +56,7 @@
                     Menu <i class="fa fa-bars"></i>
                 </button>
                 <a class="navbar-brand page-scroll" href="#page-top">
-                    <i class="fa fa-play-circle"></i> <span class="light">Start</span> Recommending
+                    <i class="fa fa-play-circle"></i> <span class="light">Start</span> Exploring
                 </a>
             </div>
 
@@ -95,7 +95,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
-                        <h1 class="brand-heading">Artorithmia</h1>
+                        <h1 class="brand-heading light">Artorithmia</h1>
                         <h2>Your personal art curator</h2>
                         <a href="#science" class="btn btn-circle page-scroll">
                             <i class="fa fa-angle-double-down animated"></i>
@@ -113,8 +113,8 @@
                 <h2>About Artorithmia</h2>
                 <p>There's a lot of amazing art out there, far too much to
                   explore on your own. Using the power of machine learning
-                  and artist know-how DiscoverArt makes the process of
-                  finding pieces you like smarter and more fun</p>
+                  and artist know-how Artorithmia makes the process of
+                  finding pieces you like smarter and more fun.</p>
             </div>
             <div class="row">
                     <img src="static/img/pipeline.png" align="center" width='800px'></img>
@@ -135,6 +135,7 @@
         <div class="row">
               <div class="col-sm-6">
                   <h2>Explore and Discover</h2>
+                  <h5>each node represents a piece of art</h5>
                   <div id="d3_ex"></div>
               </div>
               <div class="col-sm-6">
@@ -287,7 +288,7 @@ var width = document.getElementById("d3_ex").clientWidth,
     height = 600
     padding = 3, // separation between same-color circles
     clusterPadding = 6, // separation between different-color circles
-    maxRadius = 5;
+    maxRadius = 4;
 
 
 var n = {{items[0].collection_size}}, // total number of circles
@@ -344,7 +345,7 @@ var svg = d3.select("#d3_ex").append("svg")
         .style("fill", function(d) { return color(d.cluster); })
         .on("mouseup", pullart)
         .on("mousedown", function(d) {d3.select(this).transition().duration(1000).style("fill", "white").transition().delay(1000).style("fill", color(d.cluster))})
-      ;
+         ;
 
     circles.transition()
         .duration(3000)
@@ -414,12 +415,12 @@ $("#like_button").click(function() {
   })
 })
 
-// $("#dislike_button").click(function() {
-//   var art_id = this.getAttribute("data-art")
-//   $.get('/likes/' + art_id, function(data, status) {
-//     alert("data: " + data + "\nStatus: " + status)
-//   })
-// })
+$("#dislike_button").click(function() {
+  var art_id = this.getAttribute("data-art")
+  $.get('/likes/' + art_id, function(data, status) {
+    alert("data: " + data + "\nStatus: " + status)
+  })
+})
 
 function highlight() {
     d3.select(this).transition()

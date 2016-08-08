@@ -12,20 +12,21 @@ def index():
     session['art'] = range(len(df))
     session['likes'] = []
     session['dislikes'] = []
-    return recommend(json=False)
+    return recommend(json=False, like=True)
 
 @app.route('/likes/<int:id>')
 def likes(id):
     session['likes'].append(id)
     print session['likes']
-    return recommend(json=True)
+    return recommend(json=True, like=True)
 
 @app.route('/dislikes/<int:id>')
 def dislikes(id):
     session['dislikes'].append(id)
+    return recommend(json=True, like=False)
 
 @app.route('/recommend')
-def recommend(json=True):
+def recommend(json=True, like=True):
     items = [] # list of dictionaries
 
     collection_size = len(df)
@@ -33,12 +34,28 @@ def recommend(json=True):
     if len(session['likes']) == 0:
         df['radius'] = 1
         pred_radius = df['radius']
+    elif like == False:
+    #    results = rec.recommend_from_interactions(session['likes'], k=len(df)).sort('item_id', ascending=True)
+        # need to append to the original weights to make sure that I always have sizes for the dots
+        #rec_df = results['item_id', 'score'].to_dataframe()
+    #    merged = df.merge(rec_df, how='outer')
+#        merged['score'] = merged['score'].fillna(value=0)
+#        merged['radius'] = np.where(merged['score'] < merged['score'].mean(), merged['radius'] - .25, merged['radius'] + .5)
+#        merged['radius'] = np.where(merged['score'] == merged['score'].max(), merged['radius'] + 1, merged['radius'])
+        df['radius'][session['disklikes']] = 10
+        pred_radius = df['radius']
+        # limits how small the nodes can go
+#        merged['radius'] = np.where(merged['radius'] < .5, .5, merged['radius'])
+        pred_radius = merged['radius']
+        #df['radius'] = pred_radius
+
     else:
         results = rec.recommend_from_interactions(session['likes'], k=len(df)).sort('item_id', ascending=True)
         # need to append to the original weights to make sure that I always have sizes for the dots
         rec_df = results['item_id', 'score'].to_dataframe()
         merged = df.merge(rec_df, how='outer')
         merged['score'] = merged['score'].fillna(value=0)
+        merged['radius'] = np.where(merged['score'] < merged['score'].mean(), merged['radius'] - .25, merged['radius'] + .5)
         merged['radius'] = np.where(merged['score'] < merged['score'].mean(), merged['radius'] - .25, merged['radius'] + .5)
         merged['radius'] = np.where(merged['score'] == merged['score'].max(), merged['radius'] + 1, merged['radius'])
 
