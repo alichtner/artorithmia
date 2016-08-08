@@ -56,7 +56,6 @@ def recommend(json=True, like=True):
         merged = df.merge(rec_df, how='outer')
         merged['score'] = merged['score'].fillna(value=0)
         merged['radius'] = np.where(merged['score'] < merged['score'].mean(), merged['radius'] - .25, merged['radius'] + .5)
-        merged['radius'] = np.where(merged['score'] < merged['score'].mean(), merged['radius'] - .25, merged['radius'] + .5)
         merged['radius'] = np.where(merged['score'] == merged['score'].max(), merged['radius'] + 1, merged['radius'])
 
 
@@ -99,6 +98,6 @@ if __name__ == '__main__':
     df['width'] = np.round(df['width'] / 12, 1)
     df['height'] = np.round(df['height'] / 12, 1)
 
-    rec = gl.load_model('app/data/recommender')   # not sure why this needs the 'app'
+    rec = gl.load_model('data/recommender')   # not sure why this needs the 'app'
     app.secret_key = 'Hjadfjlji1909389283'
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080, threaded=True)
