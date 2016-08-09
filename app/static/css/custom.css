@@ -25,9 +25,11 @@ img.recommender_image{
 
 ul.likedimages {
   white-space: nowrap;
+  list-style: none;
+  display: inline;
 }
 
-ul.likedimages, li.likedimages {
+li.likedimages {
   list-style: none;
   display: inline;
 }
@@ -36,7 +38,7 @@ ul.likedimages, li.likedimages {
     height: 180px;
     width: 100%;
     white-space: nowrap;
-    overflow-x: scroll;
+    overflow-x: auto;
     overflow-y: hidden;
 }
 .cover-item {

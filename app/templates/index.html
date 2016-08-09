@@ -164,7 +164,9 @@
                     </div>
             </div>
         </div>
+    <!--Liked Artworks\ Section -->
     </section>
+    <div style="background: #29293d;">
     <section id="likes" class="container content-section">
     <div class="row">
       <div class="col-sm-6">
@@ -180,60 +182,7 @@
       </div>
     </div>
   </section>
-
-    <!-- Liked Images Section -->
-    <section id="likedimages" class="container content-section">
-            <div class="container">
-                <div class="col-lg-8 col-lg-offset-2">
-                    <ul class='likedimages' id="my-list">
-                    </ul>
-                </div>
-            </div>
-    </section>
-
-    <section id="about">
-          <div class="container">
-              <div class="row">
-                  <div class="col-lg-12 text-center">
-                      <h2 class="section-heading">Behind the Project</h2>
-                      <p class="section-heading">Interested in learning more about any step?  Click on the image!</p>
-                      <hr class="primary">
-                  </div>
-              </div>
-          </div>
-          <div class="container">
-              <div class="row">
-                  <div class="col-lg-3 col-md-6 text-center">
-                      <div class="service-box">
-                          <i class="fa fa-4x fa-diamond text-primary sr-icons"></i>
-                          <h3>CRISP-DM</h3>
-                          <p class="text-muted">Business Understanding</br>Data Understanding</br>Data Preparation </br>Modeling</br> Evaluation</br>Deployment</p>
-                      </div>
-                  </div>
-                  <div class="col-lg-3 col-md-6 text-center">
-                      <div class="service-box">
-                          <i class="fa fa-4x fa-paper-plane text-primary sr-icons"></i>
-                          <h3>Python</h3>
-                          <p class="text-muted">Requests + BeautifulSoup</br>MongoDB + PyMongo</br>Pandas</br>Scikit-Learn</br>Plotly</br>Flask</p>
-                      </div>
-                  </div>
-                  <div class="col-lg-3 col-md-6 text-center">
-                      <div class="service-box">
-                          <i class="fa fa-4x fa-heart text-primary sr-icons"></i>
-                          <h3>Sentiment Analysis</h3>
-                          <p class="text-muted">TextBlob</br>Dato GraphLab</br>Sentiment Analysis</br>Trained on Scraped Data</p>
-                      </div>
-                  </div>
-                  <div class="col-lg-3 col-md-6 text-center">
-                      <div class="service-box">
-                          <i class="fa fa-4x fa-newspaper-o text-primary sr-icons"></i>
-                          <h3>Dato GraphLab</h3>
-                          <p class="text-muted"> Ranking Factorization Model</br>Item Content Recommender</br>Finding latent patterns in the </br>forest of ratings.</p>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </section>
+</div>
 
     <!-- Contact Section -->
     <section id="contact" class="container content-section text-center">
@@ -286,7 +235,6 @@
 <script src="//d3js.org/d3.v3.min.js"></script>
 <script>
 var likedItems = {};
-var dislikedItems = new Set();
 var width = document.getElementById("d3_ex").clientWidth,
     height = 600
     padding = 3, // separation between same-color circles
@@ -386,15 +334,6 @@ function updateList() {
   }
 }
 
-function updateDislikes() {
-  console.log(dislikedItems)
-  for (my_id in dislikedItems) {
-  d3.select('circle[id_="+my_id+"]')
-      .transition()
-      .style("fill", "red")
-      .attr("r", 10);
-    }
-}
 
 function updateData(json) {
       var data = json['0']['data']
