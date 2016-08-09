@@ -11,67 +11,54 @@ app = Flask(__name__)
 def index():
     session['art'] = range(len(df))
     session['likes'] = []
-    session['dislikes'] = []
-    return recommend(json=False, like=True)
+    return recommend(json=False)
 
 @app.route('/likes/<int:id>')
 def likes(id):
     session['likes'].append(id)
-    print session['likes']
-    return recommend(json=True, like=True)
-
-@app.route('/dislikes/<int:id>')
-def dislikes(id):
-    session['dislikes'].append(id)
-    return recommend(json=True, like=False)
+    print 'likes', session['likes']
+    return recommend(json=True)
 
 @app.route('/recommend')
-def recommend(json=True, like=True):
+def recommend(json=True):
+    print 'entering the recommend'
     items = [] # list of dictionaries
 
     collection_size = len(df)
     n_clusters = 5
+    # when no likes have been given
     if len(session['likes']) == 0:
         df['radius'] = 1
         pred_radius = df['radius']
-    elif like == False:
-    #    results = rec.recommend_from_interactions(session['likes'], k=len(df)).sort('item_id', ascending=True)
-        # need to append to the original weights to make sure that I always have sizes for the dots
-        #rec_df = results['item_id', 'score'].to_dataframe()
-    #    merged = df.merge(rec_df, how='outer')
-#        merged['score'] = merged['score'].fillna(value=0)
-#        merged['radius'] = np.where(merged['score'] < merged['score'].mean(), merged['radius'] - .25, merged['radius'] + .5)
-#        merged['radius'] = np.where(merged['score'] == merged['score'].max(), merged['radius'] + 1, merged['radius'])
-        df['radius'][session['disklikes']] = 10
-        pred_radius = df['radius']
-        # limits how small the nodes can go
-#        merged['radius'] = np.where(merged['radius'] < .5, .5, merged['radius'])
-        pred_radius = merged['radius']
-        #df['radius'] = pred_radius
-
     else:
         results = rec.recommend_from_interactions(session['likes'], k=len(df)).sort('item_id', ascending=True)
         # need to append to the original weights to make sure that I always have sizes for the dots
         rec_df = results['item_id', 'score'].to_dataframe()
         merged = df.merge(rec_df, how='outer')
         merged['score'] = merged['score'].fillna(value=0)
-        merged['radius'] = np.where(merged['score'] < merged['score'].mean(), merged['radius'] - .25, merged['radius'] + .5)
-        merged['radius'] = np.where(merged['score'] == merged['score'].max(), merged['radius'] + 1, merged['radius'])
-
+        merged['radius'] = np.where(merged['score'] < merged['score'].mean(),
+                                    merged['radius'] - .25,
+                                    merged['radius'] + .5)
+        merged['radius'] = np.where(merged['score'] == merged['score'].max(),
+                                    merged['radius'] + 1,
+                                    merged['radius'])
 
         # set the max and min limits for node size
-        merged['radius'] = np.where(merged['radius'] < .5, .5, merged['radius'])
+        merged['radius'] = np.where(merged['radius'] < .5,
+                                    .5, merged['radius'])
         merged['radius'] = np.where(merged['radius'] >= 4, 4, merged['radius'])
         pred_radius = merged['radius']
         df['radius'] = pred_radius
 
 # build up the dictionary for each circle to represent the artwork
+    print 'build dict'
     data = [{"id_": art.item_id, "art_title": art.title, "url": art.url,
              "radius": pred_radius[i], "cluster": art.cluster_id,
              "retail_price": art.retail_price, "medium": art.medium,
              "art_width": art.width, "art_height": art.height}
             for i, art in df.iterrows()]
 
+    # initialize the starting image to show on the page
     hero_id = np.random.choice(session['art'])
     hero = data[hero_id]['url']
     hero_title = data[hero_id]['art_title']

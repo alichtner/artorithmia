@@ -141,9 +141,6 @@
                           <li>
                               <button class='btn btn-default btn-lg' id='like_button' data-art={{items[0].hero_id}}>like</button>
                             </li>
-                            <li>
-                              <button class='btn btn-default btn-lg' id='dislike_button' data-art={{items[0].hero_id}}>dislike</button>
-                            </li>
                       </ul>
                     </div>
                     <div id="art">
@@ -289,6 +286,7 @@
 <script src="//d3js.org/d3.v3.min.js"></script>
 <script>
 var likedItems = {};
+var dislikedItems = new Set();
 var width = document.getElementById("d3_ex").clientWidth,
     height = 600
     padding = 3, // separation between same-color circles
@@ -316,12 +314,21 @@ var nodes = data.map(function(d) {
       m = d.medium,
       w = d.art_width,
       h = d.art_height,
-      d = {"cluster": i, "radius": r, "id_":id, "url": u, "art_title": t, "retail_price": p, "medium": m, "art_width": w, "art_height": h,
-      x: Math.cos(i / m * 2 * Math.PI) * 200 + width / 2 + Math.random(),
-          y: Math.sin(i / m * 2 * Math.PI) * 200 + height / 2 + Math.random()};
+      d = {"cluster": i, "radius": r, "id_":id, "url": u, "art_title": t,
+           "retail_price": p, "medium": m, "art_width": w, "art_height": h};
   if (!clusters[i] || (r > clusters[i].radius)) clusters[i] = d;
   return d;
 });
+
+// Use the pack layout to initialize node positions.
+d3.layout.pack()
+    .sort(null)
+    .size([width, height])
+    .children(function(d) { return d.values; })
+    .value(function(d) { return d.radius * d.radius; })
+    .nodes({values: d3.nest()
+      .key(function(d) { return d.cluster; })
+      .entries(nodes)});
 
 var svg = d3.select("#d3_ex").append("svg")
     .attr("width", width)
@@ -363,7 +370,6 @@ function pullart() {
     // grab and send the artwork image and metadata about the selected node
     document.getElementById("recommender_image").src=d3.select(this).attr("url");
     document.getElementById("like_button").setAttribute('data-art', d3.select(this).attr("id_"));
-    document.getElementById("dislike_button").setAttribute('data-art', d3.select(this).attr("id_"));
     document.getElementById("art-title").innerHTML=d3.select(this).attr("art_title");
     document.getElementById("retail-price-tag").innerHTML=d3.select(this).attr("retail_price");
     document.getElementById("art-medium-tag").innerHTML=d3.select(this).attr("medium");
@@ -378,6 +384,16 @@ function updateList() {
   for(var id in likedItems) {
     myList.append($(`<li class='likedimages'><img src="${likedItems[id].imageUrl}" width='200px' hspace='20px'></li>`));
   }
+}
+
+function updateDislikes() {
+  console.log(dislikedItems)
+  for (my_id in dislikedItems) {
+  d3.select('circle[id_="+my_id+"]')
+      .transition()
+      .style("fill", "red")
+      .attr("r", 10);
+    }
 }
 
 function updateData(json) {
@@ -413,7 +429,7 @@ function updateData(json) {
             var i = d3.interpolate(d.radius, data[i].radius * maxRadius);
             return function(t) { return d.radius = i(t); };
           });
-        }
+}
 
 $("#like_button").click(function() {
   var art_id = this.getAttribute("data-art")
@@ -430,13 +446,6 @@ $("#like_button").click(function() {
           updateData(results.items)
           console.log('success')
       }
-  })
-})
-
-$("#dislike_button").click(function() {
-  var art_id = this.getAttribute("data-art")
-  $.get('/likes/' + art_id, function(data, status) {
-    alert("data: " + data + "\nStatus: " + status)
   })
 })
 
