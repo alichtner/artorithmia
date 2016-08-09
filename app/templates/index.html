@@ -171,6 +171,27 @@
             </div>
         </div>
     </section>
+    <div class="col-sm-6">
+        <h2>Liked Artwork</h2>
+    </div>
+    <div class="row-fluid">
+      <div class="col-lg-12 col-md-10 ">
+        <div class="cover-container">
+          <ul class='likedimages' id="my-list">
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Download Section -->
+    <section id="download" class="container content-section">
+            <div class="container">
+                <div class="col-lg-8 col-lg-offset-2">
+                    <ul class='likedimages' id="my-list">
+                    </ul>
+                </div>
+            </div>
+    </section>
 
     <!-- Download Section -->
     <section id="download" class="container content-section text-center">
@@ -180,7 +201,6 @@
                     <h2>Download Grayscale</h2>
                     <p>You can download Grayscale for free on the preview page at Start Bootstrap.</p>
                     <a href="http://startbootstrap.com/template-overviews/grayscale/" class="btn btn-default btn-lg">Visit Download Page</a>
-                    <div id="viz"></div>
                 </div>
             </div>
         </div>
@@ -280,13 +300,12 @@
 <body>
 <script src="//d3js.org/d3.v3.min.js"></script>
 <script>
-
+var likedItems = {};
 var width = document.getElementById("d3_ex").clientWidth,
     height = 600
     padding = 3, // separation between same-color circles
     clusterPadding = 6, // separation between different-color circles
     maxRadius = 5;
-
 
 var n = {{items[0].collection_size}}, // total number of circles
     m = {{items[0].n_clusters}}, // number of distinct clusters
@@ -364,6 +383,15 @@ function pullart() {
     document.getElementById("art-height-tag").innerHTML=d3.select(this).attr("art_height");
 }
 
+function updateList() {
+  var myList = $('#my-list');
+  myList.empty();
+
+  for(var id in likedItems) {
+    myList.append($(`<li class='likedimages'><img src="${likedItems[id].imageUrl}" width='200px' hspace='20px'></li>`));
+  }
+}
+
 function updateData(json) {
       var data = json['0']['data']
 
@@ -401,7 +429,12 @@ function updateData(json) {
 
 $("#like_button").click(function() {
   var art_id = this.getAttribute("data-art")
-  console.log('hi')
+  likedItems[art_id] = {
+    imageUrl: document.getElementById("recommender_image").src
+  };
+
+  updateList();
+
   $.ajax({
       type: "GET",
       url: "/likes/" + art_id,
