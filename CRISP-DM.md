@@ -18,8 +18,21 @@ The Drizl collection consists of approximately 700 jpeg images of art, each with
 
 A significant amount of time was spent on the feature engineering segment of this project. It was necessary to devise methods to adequately capture differences in different pieces of artwork. A number of image related modules including `openCV`, `colorthief` and `PIL` were used for featurizing the images.
 
-A graphlab neural network derived from `image_net` data was initially built to extract features from images, but it was decided that interpretability was an important quality in any models that were built. 
+A graphlab neural network derived from `image_net` data was initially built to extract features from images, but it was decided that interpretability was an important quality in any models that were built.
 
 4. Modeling
 5. Deployment
 6. Evaluation
+
+<p>There's a lot of amazing art out there, far too much to
+  explore on your own. Using the power of machine learning
+  and artist know-how, Artorithmia makes the process of
+  finding pieces you like smarter and more fun.</p>
+
+  <p>We start with a collection (corpus) of artwork. These are fed into
+  Artorithmia's feature engine which pulls out features relating to color,
+  composition, technique and more. Then, just as we can map a place on Earth
+  using latitude and longitude coordinates, we can map each piece of art onto k-dimensional "taste" space.</p>
+
+  <p>Artorithmia's recommender is like a GPS for art that you love. It triangulates works of
+  art similar to the ones you like.</p>

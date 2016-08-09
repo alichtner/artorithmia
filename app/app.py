@@ -84,6 +84,7 @@ if __name__ == '__main__':
     df['medium'] = df['medium'].fillna('Unknown')
     df['width'] = np.round(df['width'] / 12, 1)
     df['height'] = np.round(df['height'] / 12, 1)
+    df['retail_price'] = np.where(df['retail_price'] == 0.0, 'NA', df['retail_price'])
 
     rec = gl.load_model('data/recommender')   # not sure why this needs the 'app'
     app.secret_key = 'Hjadfjlji1909389283'
