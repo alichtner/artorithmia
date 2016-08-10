@@ -26,21 +26,34 @@ img.recommender_image{
 ul.likedimages {
   white-space: nowrap;
   list-style: none;
-  display: inline;
+  display: table-row;
+
 }
 
 li.likedimages {
   list-style: none;
-  display: inline;
+  display: table-cell;
+  vertical-align: top;
 }
 
 .cover-container {
-    height: 180px;
+    height:300px;
     width: 100%;
     white-space: nowrap;
-    overflow-x: auto;
+    overflow-x: scroll;
     overflow-y: hidden;
 }
+::-webkit-scrollbar {
+    width: 0px;  /* remove scrollbar space */
+    height: 10px;
+    background: transparent;  /* optional: just make scrollbar invisible */
+}
+/* optional: show position indicator in red */
+::-webkit-scrollbar-thumb {
+    background: #808080;
+    border-radius: 5px;
+}
+
 .cover-item {
     position: relative;
     display: inline-block;

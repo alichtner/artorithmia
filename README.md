@@ -6,7 +6,7 @@
 
 ## Project Motivation
 
-Applying labels to works of art is inherently subjective and often counter-productive. Whether or not a piece is considered *neo-classical* or *post-modern* has little bearing on whether or not a person will actually like or dislike the work. Additionally, labels create barriers to people who may be interested in art but aren't familiar with accepted terminologies. Ideally, we'd like to represent a piece of art using a set of unbiased metrics. **[Artorithmia](www.artorithmia.com)** attempts to do this by extracting features from unlabelled images and
+Applying labels to works of art is inherently subjective and often counter-productive. Whether or not a piece is considered *neo-classical* or *post-modern* has little bearing on whether or not a person will actually like or dislike the work. Additionally, labels create barriers to people who may be interested in art but aren't familiar with accepted terminologies. Ideally, we'd like to represent a piece of art using a set of unbiased metrics. **[Artorithmia](www.artorithmia.com)** attempts to do this by extracting features from unlabelled images and representing them using agnostic features.
 
 ## Goals
 1. **Extract Artwork Features** - Build an artwork featurization engine which pulls agnostic information out of a collection of work
@@ -17,11 +17,11 @@ Applying labels to works of art is inherently subjective and often counter-produ
 
 ![project pipeline](images/pipeline.png)
 
-A corpus of unlabelled pieces of art from the [Drizl](www.drizl.co) collection are fed into the featurization engine where a variety of features are pulled out of each image using python and the skimage module. The images are then clustered with the cluster engine into k-classes. A graphlab content-similarity-based recommender is used to compute the similarities between pieces of art. Both the clustering data and recommender are deployed on a flask-based webapp using Amazon Web Services.
+A corpus of unlabelled pieces of art from the [Drizl](www.drizl.co) collection were fed into the featurization engine where a variety of features are pulled out of each image using python and the skimage module. This process was performed on a compute-optimized EC2 instance. The images were then clustered with the cluster engine into k-classes. A graphlab content-similarity-based recommender was used to compute the similarities between pieces of art. Both the clustering data and recommender were then deployed on a flask-based webapp using Amazon Web Services.
+
+Simply having a recommender isn't very exciting however. The magic of Artorithmia comes in the d3-force cluster visualization. This is a representation of the art in the collection where the size of each node is a representation of the probability of liking a work based on your previous 'like' history.
 
 ![tech stack](images/tech_stack.png)
-
-## Create recommendations for users using "taste space"
 
 ## Feature Engineering
 
