@@ -13,6 +13,12 @@ Applying labels to works of art is inherently subjective and often counter-produ
 2. **Cluster Artwork** - Deploy clustering algorithms to quickly group a collection of work by different metrics depending on user requests
 3. **Prototype a Recommender** - Use the featurized images and cluster classifications to build a prototype recommendation interface to help users find art that they love
 
+## How to run it
+
+This project currently requires access to the Drizl collection. It will soon be updated to accept any collection of art.
+
+Please send any comments or suggestions to 
+
 ## Pipeline
 
 ![project pipeline](images/pipeline.png)
