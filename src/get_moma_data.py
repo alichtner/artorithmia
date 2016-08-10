@@ -7,6 +7,7 @@ import sys
 import socks
 import socket
 
+
 def get_moma_collection():
     """
     Download a CSV of the MOMA collection database.
@@ -23,7 +24,7 @@ def get_moma_collection():
 
 
 def download_moma_collection(csv_loc='data/moma_collection.csv',
-                             location='collections/moma/',start=596, res=1):
+                             location='collections/moma/', start=596, res=1):
     # read in the moma csv and filter it for 2D works of art
     """
     Download the entire MOMA collection to a local database.
@@ -79,6 +80,7 @@ def download_moma_collection(csv_loc='data/moma_collection.csv',
     print '\n\n    Download was successful!!!\n'
 
 if __name__ == '__main__':
-    socks.setdefaultproxy(proxy_type=socks.PROXY_TYPE_SOCKS5, addr="127.0.0.1", port=9050)
-    #get_moma_collection()
+    socks.setdefaultproxy(proxy_type=socks.PROXY_TYPE_SOCKS5,
+                          addr="127.0.0.1", port=9050)
+    get_moma_collection()
     download_moma_collection(start=57500)

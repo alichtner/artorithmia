@@ -27,7 +27,6 @@ ul.likedimages {
   white-space: nowrap;
   list-style: none;
   display: table-row;
-
 }
 
 li.likedimages {
@@ -43,11 +42,13 @@ li.likedimages {
     overflow-x: scroll;
     overflow-y: hidden;
 }
+
 ::-webkit-scrollbar {
     width: 0px;  /* remove scrollbar space */
     height: 10px;
     background: transparent;  /* optional: just make scrollbar invisible */
 }
+
 /* optional: show position indicator in red */
 ::-webkit-scrollbar-thumb {
     background: #808080;

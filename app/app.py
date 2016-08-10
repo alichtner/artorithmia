@@ -6,23 +6,36 @@ import numpy as np
 
 app = Flask(__name__)
 
+
 # Home page
 @app.route('/')
 def index():
+    """
+    Set up the index template and session variables for Artorithmia
+    """
     session['art'] = range(len(df))
     session['likes'] = []
     return recommend(json=False)
 
+
 @app.route('/likes/<int:id>')
 def likes(id):
+    """
+    When a 'like' event happens that 'like' is recorded. The recommend
+    function is then called to resize the nodes as a function of their
+    similarity to the images which have been liked thus far.
+
+    Input:  id (int) the id of the image which was liked
+    Output: render_template with updated node sizes
+    """
     session['likes'].append(id)
-    print 'likes', session['likes']
     return recommend(json=True)
+
 
 @app.route('/recommend')
 def recommend(json=True):
     print 'entering the recommend'
-    items = [] # list of dictionaries
+    items = []  # list of dictionaries
 
     collection_size = len(df)
     n_clusters = 5
@@ -32,10 +45,12 @@ def recommend(json=True):
         pred_radius = df['radius']
     else:
         results = rec.recommend_from_interactions(session['likes'], k=len(df)).sort('item_id', ascending=True)
-        # need to append to the original weights to make sure that I always have sizes for the dots
+
         rec_df = results['item_id', 'score'].to_dataframe()
         merged = df.merge(rec_df, how='outer')
         merged['score'] = merged['score'].fillna(value=0)
+
+        # logic for resizing nodes based on their graphlab score
         merged['radius'] = np.where(merged['score'] < merged['score'].mean(),
                                     merged['radius'] - .25,
                                     merged['radius'] + .5)
@@ -50,8 +65,7 @@ def recommend(json=True):
         pred_radius = merged['radius']
         df['radius'] = pred_radius
 
-# build up the dictionary for each circle to represent the artwork
-    print 'build dict'
+    # build up the dictionary for each circle to represent the artwork
     data = [{"id_": art.item_id, "art_title": art.title, "url": art.url,
              "radius": pred_radius[i], "cluster": art.cluster_id,
              "retail_price": art.retail_price, "medium": art.medium,
@@ -67,6 +81,7 @@ def recommend(json=True):
     hero_width = data[hero_id]['art_width']
     hero_height = data[hero_id]['art_height']
 
+    # build dictionary to be sent to index.html
     item = dict(hero=hero, hero_id=hero_id, hero_title=hero_title,
                 hero_retail_price=hero_retail_price, hero_medium=hero_medium,
                 hero_width=hero_width, hero_height=hero_height,
@@ -76,7 +91,7 @@ def recommend(json=True):
     if json:
         return jsonify(items=items)
     else:
-        return render_template('index.html', items = items)
+        return render_template('index.html', items=items)
 
 if __name__ == '__main__':
     df = pd.read_csv('data/drizl_raw.csv', index_col=0)
@@ -84,8 +99,9 @@ if __name__ == '__main__':
     df['medium'] = df['medium'].fillna('Unknown')
     df['width'] = np.round(df['width'] / 12, 1)
     df['height'] = np.round(df['height'] / 12, 1)
-    df['retail_price'] = np.where(df['retail_price'] == 0.0, 'NA', df['retail_price'])
+    df['retail_price'] = np.where(df['retail_price'] == 0.0,
+                                  'NA', df['retail_price'])
 
-    rec = gl.load_model('data/recommender')   # not sure why this needs the 'app'
+    rec = gl.load_model('data/recommender')
     app.secret_key = 'Hjadfjlji1909389283'
     app.run(host='0.0.0.0', port=8080, threaded=True)

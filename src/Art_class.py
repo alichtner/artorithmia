@@ -88,7 +88,7 @@ class Art(object):
         Input:  None
         Output: None
         """
-        #self.get_rgb()
+        self.get_rgb()
         self.get_hsv()
 
         self.primary_hue = np.argmax(self.hue_bins)
@@ -422,18 +422,9 @@ class Art(object):
 
               \r\033[1mLabels\033[0m : {}
               """
-        return str.format(self.title, self.aspect_ratio, self.bluriness, self.primary_hue, self.avg_hue, self.hue_var, self.primary_sat, self.avg_sat, self.sat_var,
+        return str.format(self.title, self.aspect_ratio, self.bluriness,
+                          self.primary_hue, self.avg_hue, self.hue_var,
+                          self.primary_sat, self.avg_sat, self.sat_var,
                           self.primary_val, self.avg_val, self.val_var,
                           self.retail_price, self.hue_peaks, self.val_peaks,
-                          self.sat_peaks, self.labels, )
-
-
-if __name__ == '__main__':
-    images = ['images/cats.png', 'images/abstract.jpg', 'images/realism.jpg']
-    for i in images:
-        art = Art()
-        art.load_image(i)
-        art.extract_blur()
-        print art.short_name, 'blurriness is: ', art.bluriness
-        art.get_palette(plot=True)
-        print art.aspect_ratio
+                          self.sat_peaks, self.labels)
