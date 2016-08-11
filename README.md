@@ -29,7 +29,7 @@ A corpus of unlabelled pieces of art from the [Drizl](www.drizl.co) collection a
 
 ### Clustering
 
-The images were then clustered with the cluster engine into k-classes. A number of clustering algorithms from sklearn were applied (Kmeans, DBSCAN and Affinity Propagation)
+The images were then clustered with the cluster engine into k-classes. A number of clustering algorithms from sklearn were applied (Kmeans, DBSCAN and Affinity Propagation). Before clustering, the data was scaled using sklearn's `StandardScaler` module.
 
 ### Recommendations
 
@@ -37,13 +37,13 @@ Because no user-data was available, recommendations are provided strictly on an 
 
 
 ### d3 and the webapp
-Simply using a simple recommender isn't very exciting, Artorithmia employs a bit of magic in the form of a d3-force cluster visualization. This is a representation of a multidimensional art corpus into two dimensions where the clustering is used to show the breadth of the art corpus. The size of each node in the visualization is a representation of the probability of liking a work based on your previous 'like' history.
+Simply using a simple recommender isn't very exciting, Artorithmia employs a bit of d3 magic to make a force-cluster visualization. This is a representation of a multidimensional art corpus projected into two dimensions where the clustering is used to show the breadth of the art corpus. The size of each node in the visualization is a representation of the probability of liking a work based on your previous 'like' history.
+
+![Screenshot](images/app_screenshot.png)
 
 At first each node is uniformly sized since my prior for a user liking any one piece is the same. As you 'like' a piece of art however, the nodes will resize based on the score the recommender provides to the user. Larger nodes represent a greater probability of liking a work. Because this visualization presents the entire corpus of work, the user has the unique ability to visually see how their personal preferences affect their predicted preferences of the entire collection. This, to me is the powerful part. Normally a recommender will only present you with items that you like rather than showing how your opinions alter your recommendations for an entire collections.
 
-To build the d3 visualization, a dictionary of values for `item_id`, `url`, `radius`, `cluster_label`, and `item meta data` are passed from the flask app into `index.html` where a "node" is initialized for every piece of art. Using
-
-The clustering is computed using KMeans of the scaled features for the different images using euclidean distance as the similarity measurement.
+To build the d3 visualization, a dictionary of values for `item_id`, `url`, `radius`, `cluster_label`, and `item meta data` are passed from the flask app into `index.html` where a "node" is initialized for every piece of art. This way, every single node is associated with an image and metadata and we are able to keep track of what users 'like'.
 
 ## Feature Engineering
 
