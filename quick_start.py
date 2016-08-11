@@ -4,7 +4,8 @@ from src.cluster_engine import ClusterArt
 
 """
 Quick-Start script to run the clustering (and recommender) on either the shard
-collection or on the full Drizl collection.
+collection or on the full Drizl collection. Run this in ipython to get access
+to the ClusterArt object and recommender methods.
 
 Input:  argv[1]: 'shard' or <datafile used to load>
         argv[2]:  <location of images>

@@ -34,7 +34,14 @@ def likes(id):
 
 @app.route('/recommend')
 def recommend(json=True):
-    print 'entering the recommend'
+    """
+    Build up the information needed to pass to index.html. This function calls
+    the recommender and resizes all the nodes.
+
+    Input:  session['likes'] (list) the list of the likes
+    Output: render_template for the html
+    """
+
     items = []  # list of dictionaries
 
     collection_size = len(df)
@@ -73,7 +80,7 @@ def recommend(json=True):
             for i, art in df.iterrows()]
 
     # initialize the starting image to show on the page
-    hero_id = np.random.choice(session['art'])
+    hero_id = 289
     hero = data[hero_id]['url']
     hero_title = data[hero_id]['art_title']
     hero_retail_price = data[hero_id]['retail_price']
@@ -99,8 +106,12 @@ if __name__ == '__main__':
     df['medium'] = df['medium'].fillna('Unknown')
     df['width'] = np.round(df['width'] / 12, 1)
     df['height'] = np.round(df['height'] / 12, 1)
-    df['retail_price'] = np.where(df['retail_price'] == 0.0,
+    df['retail_price'] = df['retail_price'].astype(int)
+    df['retail_price'] = np.where(df['retail_price'] == 0,
                                   'NA', df['retail_price'])
+    df['width'] = np.where(df['width'] == 0, 'NA', df['width'])
+    df['height'] = np.where(df['height'] == 0, 'NA', df['height'])
+
 
     rec = gl.load_model('data/recommender')
     app.secret_key = 'Hjadfjlji1909389283'
