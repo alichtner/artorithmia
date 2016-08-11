@@ -43,7 +43,7 @@ Simply using a simple recommender isn't very exciting, Artorithmia employs a bit
 
 At first each node is uniformly sized since my prior for a user liking any one piece is the same. As you 'like' a piece of art however, the nodes will resize based on the score the recommender provides to the user. Larger nodes represent a greater probability of liking a work. Because this visualization presents the entire corpus of work, the user has the unique ability to visually see how their personal preferences affect their predicted preferences of the entire collection. This, to me is the powerful part. Normally a recommender will only present you with items that you like rather than showing how your opinions alter your recommendations for an entire collections.
 
-To build the d3 visualization, a dictionary of values for `item_id`, `url`, `radius`, `cluster_label`, and `item meta data` are passed from the flask app into `index.html` where a "node" is initialized for every piece of art. This way, every single node is associated with an image and metadata and we are able to keep track of what users 'like'.
+To build the d3 visualization, a dictionary of values for `item_id`, `url`, `radius`, `cluster_label`, and `item meta data` are passed from the flask app into `index.html` where a "node" is initialized for every piece of art. This way, every single node is associated with an image and metadata and we are able to keep track of what users 'like'. d3's `force.layout` is used to simulate the clustering. Gravity and charge forces are used to keep nodes stable.
 
 ## Feature Engineering
 
@@ -65,6 +65,3 @@ A variety of technologies were employed for this project. Processing and explora
 
 ## Spin-Offs
 - With a larger corpus of images including masterworks, I could implement a "Which master am I most similar to" call which would return a masterwork most similar to a user selected image.
-
-## References
-- add list of references to what was used to pull out art features
