@@ -1,8 +1,8 @@
-# [Artorithmia](www.artorithmia.com)
+# [Artorithmia](http://www.artorithmia.com)
 
 #### Art Clustering and Recommendation
 - Galvanize Data Science - Summer 2016 - Capstone Project - Aaron Lichtner
-- *Done in partnership with [Drizl](www.drizl.co)*
+- *Done in partnership with [Drizl](http://www.drizl.co)*
 
 ## Project Motivation
 
@@ -25,7 +25,7 @@ Please send any comments or suggestions to *aaron@aaronlichtner.com*.
 
 ### Feature Engine
 
-A corpus of unlabelled pieces of art from the [Drizl](www.drizl.co) collection are fed into the featurization engine where a variety of features are pulled out of each image using python and the skimage module. This process was performed on a compute-optimized EC2 instance. Additional information on features engineering is given below.
+A corpus of unlabelled pieces of art from the [Drizl](http://www.drizl.co) collection are fed into the featurization engine where a variety of features are pulled out of each image using python and the skimage module. This process was performed on a compute-optimized EC2 instance. Additional information on features engineering is given below.
 
 ### Clustering
 
