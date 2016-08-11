@@ -1,4 +1,4 @@
-# Artorithmia
+# [Artorithmia](www.artorithmia.com)
 
 #### Art Clustering and Recommendation
 - Galvanize Data Science - Summer 2016 - Capstone Project - Aaron Lichtner
