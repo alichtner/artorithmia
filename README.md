@@ -47,13 +47,13 @@ To build the d3 visualization, a dictionary of values for `item_id`, `url`, `rad
 
 ## Feature Engineering
 
-The meat and potatoes of Artorithmia comes from the feature engineering, after all, since we aren't using labels to describe our images, well-thought out features must be extracted to describe a piece of art. Upon intiialization with an image, an `Art` object is created. When the `build_features` method is called on an `Art` object, five different categories of features are built.
+The meat and potatoes of Artorithmia comes from the feature engineering, after all, since we aren't using labels to describe our images, well-thought out features must be extracted to describe a piece of art. Upon initialization with an image, an `Art` object is created. When the `build_features` method is called on an `Art` object, five different categories of features are built.
 
 ![Features](images/art_features.png)
 
 ## Tech stack
 
-A variety of technologies were employed for this project. Processing and exploratory data analysis were performed using python and the skimage module deployed on an EC2 instance. Modeling was performed using both sklearn.cluster packages and recommendations were generated using Turi's graphlab. Finally, the webapp was deployed on AWS using a flask-based app with d3 and javascript functionality.
+A variety of technologies were employed for this project. Processing and exploratory data analysis were performed using python and the skimage module deployed on an EC2 instance. Modeling was performed using both sklearn.cluster packages and recommendations were generated using Turi's graphlab. Finally, the web-app was deployed on AWS using a flask-based app with d3 and javascript functionality.
 
 ![tech stack](images/tech_stack.png)
 
