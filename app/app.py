@@ -80,7 +80,7 @@ def recommend(json=True):
             for i, art in df.iterrows()]
 
     # initialize the starting image to show on the page
-    hero_id = 289
+    hero_id = np.random.choice(len(df))
     hero = data[hero_id]['url']
     hero_title = data[hero_id]['art_title']
     hero_retail_price = data[hero_id]['retail_price']
