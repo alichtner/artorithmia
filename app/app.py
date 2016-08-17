@@ -13,8 +13,9 @@ def index():
     """
     Set up the index template and session variables for Artorithmia
     """
-    session['art'] = range(len(df))
-    session['likes'] = []
+    #session['art'] = range(len(df))
+    #session['likes'] = []
+    session['df'] = pd.DataFrame({'radius': np.ones(len(df)), 'likes': np.zeros(len(df))}, index=df.item_id)
     return recommend(json=False)
 
 
@@ -28,7 +29,7 @@ def likes(id):
     Input:  id (int) the id of the image which was liked
     Output: render_template with updated node sizes
     """
-    session['likes'].append(id)
+    session['df'].ix[id]['likes'] = 1
     return recommend(json=True)
 
 
@@ -43,18 +44,18 @@ def recommend(json=True):
     """
 
     items = []  # list of dictionaries
+    MAX_SIZE = 4
+    MIN_SIZE = 0.5
 
-    collection_size = len(df)
+    collection_size = len(session['df'])
     n_clusters = 5
-    # when no likes have been given
-    if len(session['likes']) == 0:
-        df['radius'] = 1
-        pred_radius = df['radius']
-    else:
-        results = rec.recommend_from_interactions(session['likes'], k=len(df)).sort('item_id', ascending=True)
+
+    if sum(session['df']['likes']):
+        # take graphlab stuff into a separate function so that here it only shows the resizing logic
+        results = rec.recommend_from_interactions(session['df'][session['df']['likes']].index, k=collection_size).sort('item_id', ascending=True)
 
         rec_df = results['item_id', 'score'].to_dataframe()
-        merged = df.merge(rec_df, how='outer')
+        merged = session['df'].merge(rec_df, how='outer')
         merged['score'] = merged['score'].fillna(value=0)
 
         # logic for resizing nodes based on their graphlab score
@@ -66,15 +67,16 @@ def recommend(json=True):
                                     merged['radius'])
 
         # set the max and min limits for node size
-        merged['radius'] = np.where(merged['radius'] < .5,
-                                    .5, merged['radius'])
-        merged['radius'] = np.where(merged['radius'] >= 4, 4, merged['radius'])
+        merged['radius'] = np.where(merged['radius'] < MIN_SIZE,
+                                    MIN_SIZE, merged['radius'])
+        merged['radius'] = np.where(merged['radius'] >= MAX_SIZE,
+                                    MAX_SIZE, merged['radius'])
         pred_radius = merged['radius']
         df['radius'] = pred_radius
 
     # build up the dictionary for each circle to represent the artwork
     data = [{"id_": art.item_id, "art_title": art.title, "url": art.url,
-             "radius": pred_radius[i], "cluster": art.cluster_id,
+             "radius": session['radius'][i], "cluster": art.cluster_id,
              "retail_price": art.retail_price, "medium": art.medium,
              "art_width": art.width, "art_height": art.height}
             for i, art in df.iterrows()]
@@ -97,10 +99,10 @@ def recommend(json=True):
     items.append(item)
     if json:
         return jsonify(items=items)
-    else:
-        return render_template('index.html', items=items)
+    return render_template('index.html', items=items)
 
 if __name__ == '__main__':
+    # put all this in function to clean for the web
     df = pd.read_csv('data/drizl_raw.csv', index_col=0)
     df['title'] = df['title'].fillna('Untitled')
     df['medium'] = df['medium'].fillna('Unknown')

@@ -75,6 +75,7 @@ class ClusterArt(object):
                 art = Art(item_id=idx)
                 try:
                     art.load_image(img_path+ image)
+                    # os.path.join(img_path, image)
                 except ValueError:
                     print 'Wrong dimensions'
                 self.artwork.append(art)
@@ -95,8 +96,7 @@ class ClusterArt(object):
                 img_path (str) path to desired images
         Output: None
         """
-        # use the json file from cloudinary to direct how the collection
-        # should be built
+        # give it the capacity to take the filename as an argument so that you build it from the __init__ call
 
         df = pd.read_json(catalog, orient='records')
 
@@ -117,6 +117,7 @@ class ClusterArt(object):
                 self.artwork.append(art)
                 item_id += 1
             except Exception:
+                # make this explicit for the type of error that occurs
                 print 'Missing image file: {}'.format(img_name)
 
         self.n_artworks = len(self.artwork)
@@ -209,7 +210,7 @@ class ClusterArt(object):
         df = pd.DataFrame(data=self.features, columns=self.feat_names)
         df = pd.concat([identity, df], axis=1)
 
-        if savepath is not None:
+        if savepath:
             raw_df.to_csv(savepath + 'drizl_raw.csv')
             df.to_csv(savepath + 'drizl_scaled.csv')
         return df

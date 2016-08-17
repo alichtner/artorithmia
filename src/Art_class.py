@@ -8,10 +8,16 @@ from colorutils import Color
 from colorthief import ColorThief
 from skimage import measure, color, io, filters
 import seaborn as sns
-from detect_peaks import detect_peaks   # found this online
+from detect_peaks import detect_peaks
 
 import art_plot as viz
 
+# if building all the features into a large dictionary self.features
+# you can provide getter methods to get quick access to attributes
+#
+# @property
+# def medium(self):
+#   return self.features.get('medium')
 
 class Art(object):
     """
@@ -22,7 +28,6 @@ class Art(object):
     Output: Art (object)
     """
     def __init__(self, item_id=None):
-        # item_id is included to index where an Art object is in a collection
         """
         Initialize an Art object
 
@@ -59,6 +64,7 @@ class Art(object):
         self.time_end = None
 
     def load_image(self, filename, meta=None):
+        # build each feature set as a dictionary
         """
         Load image file and build attributes
 
@@ -129,7 +135,7 @@ class Art(object):
 
     def build_meta_features(self, meta):
         """
-        Takes a json object and parses the values into attributes
+        Take a json object and parses the values into attributes
 
         Input:  meta (dict) meta features
         Output: None
@@ -241,9 +247,16 @@ class Art(object):
         Output: None
         """
         self.hsv_image = color.rgb2hsv(self.image)
-        self.hue_bins, self.avg_hue, self.hue_var = self.create_hist_vector(self.hsv_image, 0, 48, (0.0, 1))
-        self.sat_bins, self.avg_sat, self.sat_var = self.create_hist_vector(self.hsv_image, 1, 32, (0.0, 1))
-        self.val_bins, self.avg_val, self.val_var = self.create_hist_vector(self.hsv_image, 2, 32, (0.0, 1))
+        # extract hsv features
+        # maybe change to have hsv_params = { 'hue': (0, 48, (0.0, 1)), 'val': }
+        # for k, v in hsv_params.iteritems():
+            # hsv[k] = self.create_hist_vector...
+        hue = self.create_hist_vector(self.hsv_image, 0, 48, (0.0, 1))
+        sat = self.create_hist_vector(self.hsv_image, 1, 32, (0.0, 1))
+        val = self.create_hist_vector(self.hsv_image, 2, 32, (0.0, 1))
+        self.hue_bins, self.avg_hue, self.hue_var = hue
+        self.sat_bins, self.avg_sat, self.sat_var = sat
+        self.val_bins, self.avg_val, self.val_var = val
         # get the peaks
         self.hue_peaks = self.get_peaks(self.hue_bins, 0.5, 5)
         self.val_peaks = self.get_peaks(self.val_bins, 0.4, 5)
@@ -263,6 +276,9 @@ class Art(object):
         return detect_peaks(bins, mph=min_height, mpd=min_separation, edge='both')
 
     def create_hist_vector(self, image, channel, bins, rng):
+        """
+        Create the color vectors.
+        """
         channel_values = image[:, :, channel].flatten()
         counts, _ = np.histogram(channel_values, bins, rng)
         return (1. * counts/counts.max()), channel_values.mean(), channel_values.var()  # Scale the data
@@ -276,7 +292,7 @@ class Art(object):
         # do on grayscale
         # check what the mean would give instead of variance
         self.bluriness = filters.laplace(color.rgb2gray(self.image)).var()
-        if plot is True:
+        if plot:
             sns.set_style("whitegrid", {'axes.grid': False})
             self.lap = filters.laplace(color.rgb2gray(self.image))
             plt.imshow(self.lap)
@@ -389,6 +405,10 @@ class Art(object):
                 plt.savefig(fname)
             else:
                 plt.show()
+
+    def __repr__(self):
+        # return Art(id, filename)
+        pass
 
     def __str__(self):
         """
