@@ -15,6 +15,7 @@ def index():
     """
     session['art'] = range(len(df))
     session['likes'] = []
+    session['dot_radii'] = [1 for i in xrange(len(df))]
     return recommend(json=False)
 
 
@@ -47,14 +48,12 @@ def recommend(json=True):
     collection_size = len(df)
     n_clusters = 5
     # when no likes have been given
-    if len(session['likes']) == 0:
-        df['radius'] = 1
-        pred_radius = df['radius']
-    else:
+    if len(session['likes']):
         results = rec.recommend_from_interactions(session['likes'], k=len(df)).sort('item_id', ascending=True)
+        temp_df = pd.DataFrame({'item_id':[i for i,v in enumerate(session['dot_radii'])], 'radius':session['dot_radii']})
 
         rec_df = results['item_id', 'score'].to_dataframe()
-        merged = df.merge(rec_df, how='outer')
+        merged = temp_df.merge(rec_df, how='outer')
         merged['score'] = merged['score'].fillna(value=0)
 
         # logic for resizing nodes based on their graphlab score
@@ -65,16 +64,17 @@ def recommend(json=True):
                                     merged['radius'] + 1,
                                     merged['radius'])
 
+
+
         # set the max and min limits for node size
         merged['radius'] = np.where(merged['radius'] < .5,
                                     .5, merged['radius'])
         merged['radius'] = np.where(merged['radius'] >= 4, 4, merged['radius'])
-        pred_radius = merged['radius']
-        df['radius'] = pred_radius
+        session['dot_radii'] = merged['radius'].tolist()
 
     # build up the dictionary for each circle to represent the artwork
     data = [{"id_": art.item_id, "art_title": art.title, "url": art.url,
-             "radius": pred_radius[i], "cluster": art.cluster_id,
+             "radius": session['dot_radii'][i], "cluster": art.cluster_id,
              "retail_price": art.retail_price, "medium": art.medium,
              "art_width": art.width, "art_height": art.height}
             for i, art in df.iterrows()]
